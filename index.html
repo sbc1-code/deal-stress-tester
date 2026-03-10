@@ -13,10 +13,36 @@
     --border: #222222;
     --text: #e8e8e8;
     --muted: #888888;
-    --accent: #8a9a7b;
-    --green: #8a9a7b;
-    --gold: #b8a67e;
+    --accent: #6b7a5e;
+    --green: #6b7a5e;
+    --gold: #a08840;
     --red: #a85454;
+  }
+  [data-theme="light"] {
+    --bg: #f5f3f0;
+    --surface: #ffffff;
+    --surface2: #eae8e4;
+    --border: #d5d3cf;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #5c6b50;
+    --green: #5c6b50;
+    --gold: #8a7030;
+    --red: #a03030;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f5f3f0;
+      --surface: #ffffff;
+      --surface2: #eae8e4;
+      --border: #d5d3cf;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #5c6b50;
+      --green: #5c6b50;
+      --gold: #8a7030;
+      --red: #a03030;
+    }
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -330,9 +356,32 @@
   }
   .source a { color: var(--accent); text-decoration: none; }
 
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: background 0.2s, border-color 0.2s;
+    font-family: inherit;
+  }
+  .theme-toggle:hover { border-color: var(--accent); }
+
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode" title="Toggle light/dark mode">&#9788;</button>
 
 <main style="max-width:1400px;margin:0 auto;" role="main">
   <h1><span>Deal</span> Stress Tester</h1>
@@ -829,6 +878,22 @@ for (var i = 0; i < controls.length; i++) {
 
 // Initial render
 update();
+
+// Theme toggle
+(function() {
+  var root = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var stored = localStorage.getItem('theme');
+  if (stored) root.setAttribute('data-theme', stored);
+
+  btn.addEventListener('click', function() {
+    var current = root.getAttribute('data-theme');
+    var isDark = !current ? window.matchMedia('(prefers-color-scheme: dark)').matches : current === 'dark';
+    var next = isDark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+})();
 </script>
 </body>
 </html>
