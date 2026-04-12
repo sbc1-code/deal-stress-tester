@@ -7,6 +7,7 @@
 <meta name="description" content="Stress-test real estate deals before you buy. See where a deal breaks under different scenarios. No signup, no tracking, client-side only.">
 <meta property="og:title" content="Deal Stress Tester | Real Estate Investment Analysis">
 <meta property="og:description" content="Stress-test real estate deals before you buy. See where a deal breaks under different scenarios. No signup, no tracking, client-side only.">
+<script src="https://www.paypal.com/sdk/js?client-id=AQ5rPxIh98YI1eG4VABhfoBOV4zZ0v0eYH8hH5jPg0zru4JVN9iYJfNsdkUDqm86b18vTxFzq13Xb-nc&currency=USD" data-sdk-integration-source="button-factory" defer></script>
 <style>
   :root {
     --bg: #0b0b0b;
@@ -349,6 +350,144 @@
     margin-top: 2px;
   }
 
+  /* Pro section */
+  .pro-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .pro-locked {
+    position: relative;
+    overflow: hidden;
+  }
+  .pro-locked .pro-content {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+  }
+  .pro-locked .pro-gate {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(11, 11, 11, 0.7);
+    border-radius: 10px;
+    z-index: 10;
+    gap: 12px;
+  }
+  [data-theme="light"] .pro-locked .pro-gate,
+  :root:not([data-theme="dark"]) .pro-locked .pro-gate {
+    background: rgba(245, 243, 240, 0.7);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .pro-locked .pro-gate {
+      background: rgba(11, 11, 11, 0.7);
+    }
+  }
+  .pro-gate-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .pro-gate-sub {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 280px;
+    text-align: center;
+    line-height: 1.5;
+  }
+  .pro-unlocked .pro-gate { display: none; }
+  .pro-unlocked .pro-content { filter: none; pointer-events: auto; user-select: auto; }
+
+  .key-display {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 12px;
+    text-align: center;
+  }
+  .key-display .key-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .key-display .key-value {
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    word-break: break-all;
+    user-select: all;
+    cursor: text;
+  }
+  .key-display .key-note {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .key-restore {
+    margin-top: 12px;
+    text-align: center;
+  }
+  .key-restore a {
+    color: var(--muted);
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .key-restore-form {
+    display: none;
+    margin-top: 8px;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+  }
+  .key-restore-form.visible { display: flex; }
+  .key-restore-form input {
+    font-family: monospace;
+    font-size: 13px;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    width: 200px;
+  }
+  .key-restore-form input:focus {
+    outline: 2px solid var(--accent);
+    border-color: var(--accent);
+  }
+  .key-restore-form button {
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .key-restore-error {
+    color: var(--red);
+    font-size: 11px;
+    margin-top: 4px;
+    display: none;
+  }
+
   .source {
     text-align: center;
     font-size: 11px;
@@ -485,6 +624,44 @@
           <input type="range" id="partners" min="1" max="6" step="1" value="1" aria-label="Number of partners including yourself">
         </div>
       </div>
+
+      <!-- BRRRR Pro Inputs -->
+      <div class="panel" style="margin-top:16px;" id="brrrr-inputs-panel">
+        <h2>BRRRR Cycle <span class="pro-badge">Pro</span></h2>
+
+        <div class="control-group">
+          <label for="rehabBudget">Rehab Budget <span class="val" id="v-rehab"></span></label>
+          <input type="range" id="rehabBudget" min="0" max="300000" step="1000" value="0" aria-label="Rehabilitation budget">
+        </div>
+
+        <div class="control-group">
+          <label for="arv">After-Repair Value (ARV) <span class="val" id="v-arv"></span></label>
+          <input type="range" id="arv" min="50000" max="3000000" step="5000" value="300000" aria-label="After-repair value">
+        </div>
+
+        <hr class="divider">
+        <h2>Refinance Terms</h2>
+
+        <div class="control-group">
+          <label for="refiTiming">Refi Timing <span class="val" id="v-refitiming"></span></label>
+          <input type="range" id="refiTiming" min="3" max="24" step="1" value="6" aria-label="Months before refinancing">
+        </div>
+
+        <div class="control-group">
+          <label for="refiRate">Refi Interest Rate <span class="val" id="v-refirate"></span></label>
+          <input type="range" id="refiRate" min="2" max="12" step="0.125" value="7.0" aria-label="Refinance interest rate">
+        </div>
+
+        <div class="control-group">
+          <label for="refiLtv">Refi LTV <span class="val" id="v-refiltv"></span></label>
+          <input type="range" id="refiLtv" min="50" max="85" step="1" value="75" aria-label="Refinance loan-to-value percentage">
+        </div>
+
+        <div class="control-group">
+          <label for="refiClosing">Refi Closing Costs <span class="val" id="v-reficlosing"></span></label>
+          <input type="range" id="refiClosing" min="0" max="5" step="0.5" value="2" aria-label="Refinance closing costs percentage">
+        </div>
+      </div>
     </aside>
 
     <!-- RIGHT: Outputs -->
@@ -499,6 +676,32 @@
       <div class="panel exit-panel">
         <h2>Exit Analysis</h2>
         <div class="exit-grid" id="exit-analysis"></div>
+      </div>
+
+      <!-- BRRRR Analysis (Pro) -->
+      <div class="panel exit-panel pro-locked" id="brrrr-panel">
+        <div class="pro-gate">
+          <div class="pro-gate-text">BRRRR Cycle Analysis</div>
+          <div class="pro-gate-sub">Rehab, refinance, and cash-out math. See exactly how much capital you recover and your true post-refi returns.</div>
+          <div id="paypal-button-container"></div>
+          <div class="key-restore">
+            <a id="restore-toggle" onclick="document.getElementById('restore-form').classList.toggle('visible')">Already purchased? Restore with your key</a>
+            <div class="key-restore-form" id="restore-form">
+              <input type="text" id="restore-key-input" placeholder="Paste your key">
+              <button onclick="restoreWithKey()">Unlock</button>
+            </div>
+            <div class="key-restore-error" id="restore-error">Invalid key. Check and try again.</div>
+          </div>
+        </div>
+        <div class="key-display" id="key-display" style="display:none;">
+          <div class="key-label">Your License Key</div>
+          <div class="key-value" id="key-value"></div>
+          <div class="key-note">Save this key. Use it to restore your purchase on any browser or device.</div>
+        </div>
+        <div class="pro-content">
+          <h2>BRRRR Analysis <span class="pro-badge">Pro</span></h2>
+          <div class="exit-grid" id="brrrr-analysis"></div>
+        </div>
       </div>
 
       <!-- Stress Test Heatmaps -->
@@ -588,10 +791,17 @@ function calcDeal(params) {
   var appreciationPct = params.appreciationPct;
   var partners = params.partners;
 
+  var rehabBudget = params.rehabBudget || 0;
+  var arv = params.arv || purchasePrice;
+  var refiTiming = params.refiTiming || 6;
+  var refiRate = params.refiRate || interestRate;
+  var refiLtv = params.refiLtv || 75;
+  var refiClosingPct = params.refiClosingPct || 2;
+
   var downPayment = purchasePrice * (downPaymentPct / 100);
   var loanAmount = purchasePrice - downPayment;
   var closingBuy = purchasePrice * (closingBuyPct / 100);
-  var totalCashInvested = downPayment + closingBuy;
+  var totalCashInvested = downPayment + closingBuy + rehabBudget;
 
   var monthlyMortgage = calcMortgagePayment(loanAmount, interestRate, loanTerm);
 
@@ -631,6 +841,32 @@ function calcDeal(params) {
   var totalHours = 5 * 12 * holdPeriod;
   var effectiveHourly = totalHours > 0 ? perPartnerProfit / totalHours : 0;
 
+  // BRRRR refi calculations
+  var brrrrEnabled = rehabBudget > 0;
+  var refiAppraisal = arv;
+  var refiLoanAmount = refiAppraisal * (refiLtv / 100);
+  var originalBalanceAtRefi = remainingBalance(loanAmount, interestRate, loanTerm, refiTiming);
+  var refiClosingCost = refiLoanAmount * (refiClosingPct / 100);
+  var cashOutProceeds = refiLoanAmount - originalBalanceAtRefi - refiClosingCost;
+  var netCashLeftInDeal = totalCashInvested - Math.max(0, cashOutProceeds);
+  if (netCashLeftInDeal < 0) netCashLeftInDeal = 0;
+  var refiMonthlyPayment = calcMortgagePayment(refiLoanAmount, refiRate, loanTerm);
+
+  // Post-refi cash flow (uses refi mortgage instead of original)
+  var postRefiMonthlyCF = monthlyNOI - refiMonthlyPayment;
+  var postRefiAnnualCF = postRefiMonthlyCF * 12;
+  var postRefiCoC = netCashLeftInDeal > 0 ? (postRefiAnnualCF / netCashLeftInDeal) * 100 : (postRefiAnnualCF > 0 ? Infinity : 0);
+  var capitalRecovered = cashOutProceeds >= totalCashInvested;
+
+  // Post-refi exit (hold period starts from refi, use refi loan for remaining balance)
+  var postRefiHoldMonths = Math.max(0, (holdPeriod * 12) - refiTiming);
+  var refiMortgageBalanceAtSale = remainingBalance(refiLoanAmount, refiRate, loanTerm, postRefiHoldMonths);
+  var postRefiNetSaleProceeds = salePrice - closingSell - refiMortgageBalanceAtSale;
+  var postRefiTotalCF = postRefiAnnualCF * ((holdPeriod * 12 - refiTiming) / 12);
+  var preRefiCF = monthlyCashFlow * refiTiming;
+  var postRefiTotalProfit = postRefiNetSaleProceeds + postRefiTotalCF + preRefiCF - totalCashInvested;
+  var postRefiPerPartner = postRefiTotalProfit / partners;
+
   return {
     downPayment: downPayment,
     loanAmount: loanAmount,
@@ -652,7 +888,21 @@ function calcDeal(params) {
     perPartnerProfit: perPartnerProfit,
     annualizedROI: annualizedROI,
     effectiveHourly: effectiveHourly,
-    totalHours: totalHours
+    totalHours: totalHours,
+    brrrrEnabled: brrrrEnabled,
+    rehabBudget: rehabBudget,
+    refiAppraisal: refiAppraisal,
+    refiLoanAmount: refiLoanAmount,
+    originalBalanceAtRefi: originalBalanceAtRefi,
+    refiClosingCost: refiClosingCost,
+    cashOutProceeds: cashOutProceeds,
+    netCashLeftInDeal: netCashLeftInDeal,
+    refiMonthlyPayment: refiMonthlyPayment,
+    postRefiMonthlyCF: postRefiMonthlyCF,
+    postRefiAnnualCF: postRefiAnnualCF,
+    postRefiCoC: postRefiCoC,
+    capitalRecovered: capitalRecovered,
+    postRefiPerPartner: postRefiPerPartner
   };
 }
 
@@ -671,7 +921,13 @@ function getParams() {
     closingSellPct: +document.getElementById('closingSell').value,
     holdPeriod: +document.getElementById('holdPeriod').value,
     appreciationPct: +document.getElementById('appreciation').value,
-    partners: +document.getElementById('partners').value
+    partners: +document.getElementById('partners').value,
+    rehabBudget: +document.getElementById('rehabBudget').value,
+    arv: +document.getElementById('arv').value,
+    refiTiming: +document.getElementById('refiTiming').value,
+    refiRate: +document.getElementById('refiRate').value,
+    refiLtv: +document.getElementById('refiLtv').value,
+    refiClosingPct: +document.getElementById('refiClosing').value
   };
 }
 
@@ -783,6 +1039,14 @@ function update() {
   document.getElementById('v-appreciation').textContent = fmtPct(p.appreciationPct, 1);
   document.getElementById('v-partners').textContent = p.partners;
 
+  // BRRRR input labels
+  document.getElementById('v-rehab').textContent = fmt(p.rehabBudget);
+  document.getElementById('v-arv').textContent = fmt(p.arv);
+  document.getElementById('v-refitiming').textContent = p.refiTiming + ' months';
+  document.getElementById('v-refirate').textContent = fmtPct(p.refiRate, 1);
+  document.getElementById('v-refiltv').textContent = p.refiLtv + '%';
+  document.getElementById('v-reficlosing').textContent = p.refiClosingPct + '%';
+
   var deal = calcDeal(p);
 
   // Stats row
@@ -839,7 +1103,7 @@ function update() {
     '<div class="exit-item">' +
       '<div class="exit-label">Total Cash Invested</div>' +
       '<div class="exit-value">' + fmt(deal.totalCashInvested) + '</div>' +
-      '<div class="exit-sub">' + fmt(deal.downPayment) + ' down + ' + fmt(deal.closingBuy) + ' closing</div>' +
+      '<div class="exit-sub">' + fmt(deal.downPayment) + ' down + ' + fmt(deal.closingBuy) + ' closing' + (deal.rehabBudget > 0 ? ' + ' + fmt(deal.rehabBudget) + ' rehab' : '') + '</div>' +
     '</div>' +
     '<div class="exit-item">' +
       '<div class="exit-label">Projected Sale Price (Year ' + p.holdPeriod + ')</div>' +
@@ -867,6 +1131,50 @@ function update() {
       '<div class="exit-sub">Assumes 5 hrs/mo management (' + deal.totalHours.toLocaleString() + ' total hrs)</div>' +
     '</div>';
 
+  // BRRRR analysis panel
+  var brrrrHTML = '';
+  var cashOutColor = deal.cashOutProceeds >= 0 ? 'var(--green)' : 'var(--red)';
+  var postRefiCFColor = deal.postRefiMonthlyCF >= 0 ? (deal.postRefiCoC >= 8 ? 'var(--green)' : 'var(--gold)') : 'var(--red)';
+  var cocDisplay = deal.postRefiCoC === Infinity ? 'Infinite' : fmtPct(deal.postRefiCoC, 1);
+  var rehabNote = deal.rehabBudget > 0 ? ' + ' + fmt(deal.rehabBudget) + ' rehab' : '';
+
+  brrrrHTML +=
+    '<div class="exit-item">' +
+      '<div class="exit-label">All-In Cost</div>' +
+      '<div class="exit-value">' + fmt(deal.totalCashInvested) + '</div>' +
+      '<div class="exit-sub">' + fmt(deal.downPayment) + ' down + ' + fmt(deal.closingBuy) + ' closing' + rehabNote + '</div>' +
+    '</div>' +
+    '<div class="exit-item">' +
+      '<div class="exit-label">Refi Appraisal (ARV)</div>' +
+      '<div class="exit-value">' + fmt(deal.refiAppraisal) + '</div>' +
+      '<div class="exit-sub">New loan: ' + fmt(deal.refiLoanAmount) + ' at ' + fmtPct(p.refiLtv) + ' LTV</div>' +
+    '</div>' +
+    '<div class="exit-item">' +
+      '<div class="exit-label">Cash-Out Proceeds</div>' +
+      '<div class="exit-value" style="color:' + cashOutColor + '">' + fmt2(deal.cashOutProceeds) + '</div>' +
+      '<div class="exit-sub">New loan - ' + fmt(deal.originalBalanceAtRefi) + ' payoff - ' + fmt(deal.refiClosingCost) + ' closing</div>' +
+    '</div>' +
+    '<div class="exit-item">' +
+      '<div class="exit-label">Net Cash Left in Deal</div>' +
+      '<div class="exit-value" style="color:' + (deal.capitalRecovered ? 'var(--green)' : 'var(--text)') + '">' + fmt(deal.netCashLeftInDeal) + '</div>' +
+      '<div class="exit-sub">' + (deal.capitalRecovered ? 'All capital recovered' : fmt(deal.totalCashInvested) + ' invested - ' + fmt2(deal.cashOutProceeds) + ' recovered') + '</div>' +
+    '</div>' +
+    '<div class="exit-item">' +
+      '<div class="exit-label">Post-Refi Cash Flow</div>' +
+      '<div class="exit-value" style="color:' + postRefiCFColor + '">' + fmt2(deal.postRefiMonthlyCF) + '/mo</div>' +
+      '<div class="exit-sub">New mortgage: ' + fmt(deal.refiMonthlyPayment) + '/mo</div>' +
+    '</div>' +
+    '<div class="exit-item">' +
+      '<div class="exit-label">Post-Refi Cash-on-Cash</div>' +
+      '<div class="exit-value" style="color:' + postRefiCFColor + '">' + cocDisplay + '</div>' +
+      '<div class="exit-sub">' + (deal.capitalRecovered ? 'Infinite return: $0 of your money at risk' : 'On ' + fmt(deal.netCashLeftInDeal) + ' left in deal') + '</div>' +
+    '</div>';
+
+  document.getElementById('brrrr-analysis').innerHTML = brrrrHTML;
+
+  // Update exit analysis total cash invested to include rehab
+  // (already handled via calcDeal totalCashInvested)
+
   // Stress grids: Table 1 = Interest Rate vs Vacancy, Table 2 = Rent Decline vs Expense Increase
   renderStressGrid(p, stressAxes.rate, stressAxes.vacancy, 'stress-thead-1', 'stress-tbody-1');
   renderStressGrid(p, stressAxes.rent, stressAxes.expense, 'stress-thead-2', 'stress-tbody-2');
@@ -877,6 +1185,123 @@ var controls = document.querySelectorAll('input[type="range"], select');
 for (var i = 0; i < controls.length; i++) {
   controls[i].addEventListener('input', update);
 }
+
+// --- Sync ARV default to purchase price ---
+document.getElementById('purchasePrice').addEventListener('input', function() {
+  var arvSlider = document.getElementById('arv');
+  var currentARV = +arvSlider.value;
+  var newPrice = +this.value;
+  // Only auto-sync if ARV hasn't been manually changed from purchase price
+  if (currentARV === newPrice - 5000 || currentARV === newPrice + 5000 || currentARV === newPrice) {
+    arvSlider.value = newPrice;
+  }
+});
+
+// --- License key generation ---
+// Simple hash: takes a string, returns a short hex key
+function generateKey(transactionId) {
+  var str = 'DST-PRO-' + transactionId;
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    var ch = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + ch;
+    hash = hash & hash; // Convert to 32-bit int
+  }
+  // Create a readable key from the hash + transaction prefix
+  var hex = Math.abs(hash).toString(16).toUpperCase();
+  while (hex.length < 8) hex = '0' + hex;
+  return 'DST-' + hex.slice(0, 4) + '-' + hex.slice(4, 8);
+}
+
+function validateKey(key) {
+  // Key format: DST-XXXX-XXXX (hex chars)
+  return /^DST-[0-9A-F]{4}-[0-9A-F]{4}$/.test(key.trim().toUpperCase());
+}
+
+// --- Pro unlock ---
+var PRO_KEY = 'dst_pro_unlocked';
+var LICENSE_KEY = 'dst_license_key';
+
+function checkProUnlock() {
+  var unlocked = localStorage.getItem(PRO_KEY) === 'true';
+  var panel = document.getElementById('brrrr-panel');
+  if (unlocked) {
+    panel.classList.remove('pro-locked');
+    panel.classList.add('pro-unlocked');
+    // Show saved key if available
+    var savedKey = localStorage.getItem(LICENSE_KEY);
+    if (savedKey) {
+      document.getElementById('key-value').textContent = savedKey;
+      document.getElementById('key-display').style.display = 'block';
+    }
+  }
+}
+
+function unlockPro(licenseKey) {
+  localStorage.setItem(PRO_KEY, 'true');
+  if (licenseKey) {
+    localStorage.setItem(LICENSE_KEY, licenseKey);
+    document.getElementById('key-value').textContent = licenseKey;
+    document.getElementById('key-display').style.display = 'block';
+  }
+  checkProUnlock();
+}
+
+function restoreWithKey() {
+  var input = document.getElementById('restore-key-input');
+  var error = document.getElementById('restore-error');
+  var key = input.value.trim().toUpperCase();
+  if (validateKey(key)) {
+    error.style.display = 'none';
+    unlockPro(key);
+  } else {
+    error.style.display = 'block';
+  }
+}
+checkProUnlock();
+
+// PayPal Smart Button - wait for SDK to load
+function renderPayPalButton() {
+  if (localStorage.getItem(PRO_KEY)) return;
+  var container = document.getElementById('paypal-button-container');
+  if (!container || container.childNodes.length > 0) return;
+  paypal.Buttons({
+    style: {
+      shape: 'pill',
+      color: 'black',
+      layout: 'vertical',
+      label: 'pay'
+    },
+    createOrder: function(data, actions) {
+      return actions.order.create({
+        purchase_units: [{
+          description: 'Deal Stress Tester Pro - BRRRR Cycle Analysis',
+          amount: { value: '10.00', currency_code: 'USD' }
+        }]
+      });
+    },
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
+        var txnId = details.id || data.orderID || Date.now().toString();
+        var key = generateKey(txnId);
+        unlockPro(key);
+      });
+    },
+    onError: function(err) {
+      console.error('PayPal error:', err);
+    }
+  }).render('#paypal-button-container');
+}
+// Try immediately, retry on script load, and poll as fallback
+if (window.paypal) {
+  renderPayPalButton();
+}
+var ppScript = document.querySelector('script[src*="paypal.com/sdk"]');
+if (ppScript) ppScript.addEventListener('load', function() { setTimeout(renderPayPalButton, 100); });
+// Fallback poll in case events fire out of order
+var ppPoll = setInterval(function() {
+  if (window.paypal) { clearInterval(ppPoll); renderPayPalButton(); }
+}, 500);
 
 // Initial render
 update();
