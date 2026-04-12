@@ -958,8 +958,9 @@ function calcDeal(params) {
   var annualCashFlow = monthlyCashFlow * 12;
   var cashOnCash = totalCashInvested > 0 ? (annualCashFlow / totalCashInvested) * 100 : 0;
 
-  // Exit
-  var salePrice = purchasePrice * Math.pow(1 + appreciationPct / 100, holdPeriod);
+  // Exit - appreciate from ARV if BRRRR rehab is active, otherwise purchase price
+  var appreciationBase = (rehabBudget > 0 && arv > purchasePrice) ? arv : purchasePrice;
+  var salePrice = appreciationBase * Math.pow(1 + appreciationPct / 100, holdPeriod);
   var closingSell = salePrice * (closingSellPct / 100);
   var monthsPaid = Math.min(holdPeriod * 12, loanTerm * 12);
   var mortgageBalance = remainingBalance(loanAmount, interestRate, loanTerm, monthsPaid);
@@ -1045,7 +1046,10 @@ function calcDeal(params) {
     postRefiAnnualCF: postRefiAnnualCF,
     postRefiCoC: postRefiCoC,
     capitalRecovered: capitalRecovered,
-    postRefiPerPartner: postRefiPerPartner
+    postRefiPerPartner: postRefiPerPartner,
+    postRefiTotalCF: postRefiTotalCF,
+    preRefiCF: preRefiCF,
+    postRefiNetSaleProceeds: postRefiNetSaleProceeds
   };
 }
 
@@ -1238,9 +1242,17 @@ function update() {
       '<div class="exit-value">' + fmt(deal.monthlyMortgage) + '/mo</div>' +
     '</div>';
 
-  // Exit analysis panel
+  // Exit analysis panel - use BRRRR-adjusted numbers when rehab is active
   var partnerNote = p.partners > 1 ? ' (your ' + (100 / p.partners).toFixed(0) + '% share)' : '';
+  var useBrrrr = deal.rehabBudget > 0;
+  var exitProceeds = useBrrrr ? deal.postRefiNetSaleProceeds : deal.netSaleProceeds;
+  var exitProfit = useBrrrr ? deal.postRefiPerPartner : deal.perPartnerProfit;
+  var exitCF = useBrrrr ? (deal.postRefiTotalCF + deal.preRefiCF) : deal.totalCashFlowOverHold;
+  var exitCFLabel = useBrrrr
+    ? (p.refiTiming + ' mo pre-refi + ' + ((p.holdPeriod * 12 - p.refiTiming) / 12).toFixed(1) + ' yr post-refi')
+    : (p.holdPeriod + ' years x ' + fmt2(deal.annualCashFlow) + '/yr');
   var hourlyColor = deal.effectiveHourly >= 0 ? 'accent' : 'red';
+  var appreciationNote = useBrrrr ? fmtPct(p.appreciationPct, 1) + '/yr on ' + fmt(p.arv) + ' ARV' : fmtPct(p.appreciationPct, 1) + '/yr appreciation';
 
   document.getElementById('exit-analysis').innerHTML =
     '<div class="exit-item">' +
@@ -1251,22 +1263,22 @@ function update() {
     '<div class="exit-item">' +
       '<div class="exit-label">Projected Sale Price (Year ' + p.holdPeriod + ')</div>' +
       '<div class="exit-value">' + fmt(deal.salePrice) + '</div>' +
-      '<div class="exit-sub">' + fmtPct(p.appreciationPct, 1) + '/yr appreciation</div>' +
+      '<div class="exit-sub">' + appreciationNote + '</div>' +
     '</div>' +
     '<div class="exit-item">' +
       '<div class="exit-label">Net Sale Proceeds</div>' +
-      '<div class="exit-value" style="color:' + (deal.netSaleProceeds >= 0 ? 'var(--green)' : 'var(--red)') + '">' + fmt2(deal.netSaleProceeds) + '</div>' +
-      '<div class="exit-sub">After mortgage payoff + ' + p.closingSellPct + '% sell costs</div>' +
+      '<div class="exit-value" style="color:' + (exitProceeds >= 0 ? 'var(--green)' : 'var(--red)') + '">' + fmt2(exitProceeds) + '</div>' +
+      '<div class="exit-sub">After ' + (useBrrrr ? 'refi ' : '') + 'mortgage payoff + ' + p.closingSellPct + '% sell costs</div>' +
     '</div>' +
     '<div class="exit-item">' +
       '<div class="exit-label">Total Profit' + partnerNote + '</div>' +
-      '<div class="exit-value" style="color:' + (deal.perPartnerProfit >= 0 ? 'var(--green)' : 'var(--red)') + '">' + fmt2(deal.perPartnerProfit) + '</div>' +
+      '<div class="exit-value" style="color:' + (exitProfit >= 0 ? 'var(--green)' : 'var(--red)') + '">' + fmt2(exitProfit) + '</div>' +
       '<div class="exit-sub">Cash flow + sale proceeds - invested</div>' +
     '</div>' +
     '<div class="exit-item">' +
       '<div class="exit-label">Cash Flow Over Hold</div>' +
-      '<div class="exit-value" style="color:' + (deal.totalCashFlowOverHold >= 0 ? 'var(--green)' : 'var(--red)') + '">' + fmt2(deal.totalCashFlowOverHold) + '</div>' +
-      '<div class="exit-sub">' + p.holdPeriod + ' years x ' + fmt2(deal.annualCashFlow) + '/yr</div>' +
+      '<div class="exit-value" style="color:' + (exitCF >= 0 ? 'var(--green)' : 'var(--red)') + '">' + fmt2(exitCF) + '</div>' +
+      '<div class="exit-sub">' + exitCFLabel + '</div>' +
     '</div>' +
     '<div class="exit-item">' +
       '<div class="exit-label">Effective Hourly Rate</div>' +
