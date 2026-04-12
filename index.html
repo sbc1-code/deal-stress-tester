@@ -3,10 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deal Stress Tester | Real Estate Investment Analysis</title>
-<meta name="description" content="Stress-test real estate deals before you buy. See where a deal breaks under different scenarios. No signup, no tracking, client-side only.">
-<meta property="og:title" content="Deal Stress Tester | Real Estate Investment Analysis">
-<meta property="og:description" content="Stress-test real estate deals before you buy. See where a deal breaks under different scenarios. No signup, no tracking, client-side only.">
+<title>Free BRRRR Calculator with Stress Test | No Signup Required</title>
+<meta name="description" content="Free BRRRR calculator with built-in stress testing. Analyze cash flow, rehab, refinance, vacancy risk, and rate hikes before you buy. No signup, no tracking, runs in your browser.">
+<meta property="og:title" content="Free BRRRR Calculator with Stress Test | No Signup Required">
+<meta property="og:description" content="Free BRRRR calculator with built-in stress testing. Analyze cash flow, rehab, refinance, vacancy risk, and rate hikes before you buy. No signup, no tracking.">
+<meta property="og:type" content="website">
+<meta name="keywords" content="BRRRR calculator, BRRRR stress test, rental property calculator, cash on cash calculator, real estate deal analyzer, BRRRR method calculator, refinance calculator real estate, investment property calculator">
+<link rel="canonical" href="https://sbc1-code.github.io/deal-stress-tester/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "BRRRR Stress Test Calculator",
+  "description": "Free BRRRR calculator with stress testing for real estate investors. Analyze cash flow, rehab costs, refinance scenarios, vacancy risk, and interest rate hikes. No signup, no tracking, client-side only.",
+  "url": "https://sbc1-code.github.io/deal-stress-tester/",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Modern web browser with JavaScript",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Sebastian Becerra",
+    "url": "https://sbc1-code.github.io/portfolio/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the BRRRR method in real estate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "BRRRR stands for Buy, Rehab, Rent, Refinance, Repeat. It is a real estate investment strategy where you purchase a distressed property below market value, renovate it to increase its value, rent it out for cash flow, refinance based on the new higher appraised value to pull out your initial capital, and repeat the process with the recovered funds."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do you calculate cash-on-cash return for a BRRRR deal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cash-on-cash return is your annual pre-tax cash flow divided by the total cash you invested. For a BRRRR deal, your total cash invested includes down payment, closing costs, and rehab budget. After refinancing, your net cash left in the deal may be lower, which can dramatically increase your cash-on-cash return, sometimes to infinity if you recover all your capital."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What vacancy rate should I use for stress testing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A common baseline is 5-8% vacancy for stable rental markets. For stress testing, model scenarios at 10%, 15%, and even 20% to see where your deal breaks. Markets with higher turnover, seasonal demand, or economic volatility warrant higher vacancy assumptions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much should I budget for rehab in a BRRRR deal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Rehab budgets vary widely by property condition and market. A light cosmetic rehab might cost $15,000-$30,000, while a full gut renovation can exceed $100,000. Always get contractor bids before committing. Add a 10-20% contingency buffer. The key BRRRR metric is whether the after-repair value (ARV) supports a refinance that recovers your rehab costs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a good cash-on-cash return for a BRRRR deal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Most investors target 8-12% cash-on-cash return as a baseline for rental properties. For BRRRR deals, returns can be much higher because you are recovering capital through refinancing, reducing your cash basis. If you recover all invested capital, your cash-on-cash return becomes infinite, though this does not mean the deal is risk-free."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does refinance LTV affect cash left in a BRRRR deal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Loan-to-value (LTV) determines how much you can borrow against the property's appraised value at refinance. A 75% LTV on a $400,000 ARV gives you a $300,000 loan. If your original loan balance is $200,000 and refi closing costs are $6,000, you recover $94,000 in cash. Higher LTV means more cash out, but also higher monthly payments and potentially negative cash flow."
+      }
+    }
+  ]
+}
+</script>
 <script src="https://www.paypal.com/sdk/js?client-id=AQ5rPxIh98YI1eG4VABhfoBOV4zZ0v0eYH8hH5jPg0zru4JVN9iYJfNsdkUDqm86b18vTxFzq13Xb-nc&currency=USD" data-sdk-integration-source="button-factory" defer></script>
 <style>
   :root {
@@ -525,8 +606,8 @@
 <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode" title="Toggle light/dark mode">&#9788;</button>
 
 <main style="max-width:1400px;margin:0 auto;" role="main">
-  <h1><span>Deal</span> Stress Tester</h1>
-  <p class="subtitle">Plug in your numbers. See where the deal breaks before you buy.</p>
+  <h1><span>BRRRR</span> Stress Test Calculator</h1>
+  <p class="subtitle">Plug in your numbers. See where the deal breaks before you buy. Free, no signup, no tracking.</p>
 
   <div class="stats-row" id="stats-row" role="region" aria-label="Key metrics summary"></div>
 
@@ -740,8 +821,70 @@
   <footer class="source" role="contentinfo">
     <p style="color:var(--accent);font-weight:500;margin-bottom:6px;">Your numbers never leave your browser.</p>
     <p>No backend, no database, no analytics, no cookies.</p>
-    <p style="margin-top:6px;">Built by <a href="https://github.com/sbc1-code" target="_blank" rel="noopener noreferrer">Sebastian Becerra</a> | MIT License</p>
+    <p style="margin-top:6px;">Built by <a href="https://sbc1-code.github.io/portfolio/" target="_blank" rel="noopener noreferrer">Sebastian Becerra</a></p>
   </footer>
+
+  <!-- SEO Content Section -->
+  <article style="max-width:800px;margin:48px auto 0;padding:0 24px;">
+
+    <h2 style="font-size:22px;font-weight:600;margin-bottom:12px;color:var(--text);">How to Use This BRRRR Calculator</h2>
+    <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:24px;">
+      Start by entering your purchase price, down payment, and interest rate on the left. Add your expected monthly rent, vacancy rate, and operating expenses. The calculator instantly shows your monthly cash flow, cash-on-cash return, and annualized ROI. Then use the two stress test grids to see how your deal holds up under rising rates, higher vacancy, declining rents, and increasing expenses. Green cells are strong. Gold is marginal. Red means the deal loses money. If your base case is gold or red, the deal needs better numbers or a lower price.
+    </p>
+
+    <h2 style="font-size:22px;font-weight:600;margin-bottom:12px;color:var(--text);">What Is the BRRRR Method?</h2>
+    <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:24px;">
+      BRRRR stands for Buy, Rehab, Rent, Refinance, Repeat. You purchase a distressed property below market value, renovate it to force appreciation, rent it for cash flow, refinance based on the new appraised value (ARV) to recover your initial capital, and repeat with the freed-up funds. The strategy works when the gap between purchase price + rehab and ARV is large enough to cover closing costs and leave equity in the deal. The risk is overpaying for rehab, overestimating ARV, or getting caught by rising interest rates between purchase and refinance.
+    </p>
+
+    <h2 style="font-size:22px;font-weight:600;margin-bottom:12px;color:var(--text);">How to Stress Test a BRRRR Deal</h2>
+    <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:24px;">
+      Most calculators show you the best case. This one shows you where the deal breaks. The stress test grids cross two variables at a time: interest rate vs. vacancy, and rent decline vs. expense increases. Look for how many cells stay green. A deal that turns red with just a 1% rate increase and 5% vacancy bump is fragile. A deal that stays green across the entire grid is resilient. The goal is not to find deals that look good on paper. The goal is to find deals that survive reality.
+    </p>
+
+    <h2 style="font-size:22px;font-weight:600;margin-bottom:12px;color:var(--text);">Example: A Real 4-Plex BRRRR Analysis</h2>
+    <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:24px;">
+      Consider a 4-plex purchased at $130,000 with $108,000 in rehab, financed at 7% on a 30-year term with 25% down. Monthly rent is $2,400 across all units, vacancy at 8%, and $600/month in operating expenses. After rehab, the property appraises at $280,000. You refinance at 75% LTV. The stress test reveals: at base case, cash flow is marginally negative. Add 2% to interest rates and 10% vacancy, and the deal is deeply red. This was a real deal. The investor netted $15,000 over 4.5 years on paper, but the effective hourly rate for management was under $6/hr. The stress test would have shown this before closing.
+    </p>
+
+    <h2 style="font-size:22px;font-weight:600;margin-bottom:12px;color:var(--text);">BRRRR Calculator vs. Spreadsheet</h2>
+    <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-bottom:24px;">
+      Spreadsheets are flexible but slow. You have to build every formula, and scenario analysis requires manually changing cells one at a time. This calculator gives you instant stress testing across dozens of scenarios simultaneously, with color-coded results you can read in seconds. No formulas to break, no files to manage, no signup required. And unlike most online calculators, your data never leaves your browser.
+    </p>
+
+    <h2 style="font-size:22px;font-weight:600;margin-bottom:12px;color:var(--text);">Frequently Asked Questions</h2>
+
+    <details style="margin-bottom:16px;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface);">
+      <summary style="font-size:14px;font-weight:600;cursor:pointer;color:var(--text);">What is the BRRRR method in real estate?</summary>
+      <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-top:12px;">BRRRR stands for Buy, Rehab, Rent, Refinance, Repeat. It is a real estate investment strategy where you purchase a distressed property below market value, renovate it to increase its value, rent it out for cash flow, refinance based on the new higher appraised value to pull out your initial capital, and repeat the process with the recovered funds.</p>
+    </details>
+
+    <details style="margin-bottom:16px;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface);">
+      <summary style="font-size:14px;font-weight:600;cursor:pointer;color:var(--text);">How do you calculate cash-on-cash return for a BRRRR deal?</summary>
+      <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-top:12px;">Cash-on-cash return is your annual pre-tax cash flow divided by the total cash you invested. For a BRRRR deal, your total cash invested includes down payment, closing costs, and rehab budget. After refinancing, your net cash left in the deal may be lower, which can dramatically increase your cash-on-cash return, sometimes to infinity if you recover all your capital.</p>
+    </details>
+
+    <details style="margin-bottom:16px;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface);">
+      <summary style="font-size:14px;font-weight:600;cursor:pointer;color:var(--text);">What vacancy rate should I use for stress testing?</summary>
+      <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-top:12px;">A common baseline is 5-8% vacancy for stable rental markets. For stress testing, model scenarios at 10%, 15%, and even 20% to see where your deal breaks. Markets with higher turnover, seasonal demand, or economic volatility warrant higher vacancy assumptions.</p>
+    </details>
+
+    <details style="margin-bottom:16px;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface);">
+      <summary style="font-size:14px;font-weight:600;cursor:pointer;color:var(--text);">How much should I budget for rehab in a BRRRR deal?</summary>
+      <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-top:12px;">Rehab budgets vary widely by property condition and market. A light cosmetic rehab might cost $15,000-$30,000, while a full gut renovation can exceed $100,000. Always get contractor bids before committing. Add a 10-20% contingency buffer. The key BRRRR metric is whether the after-repair value (ARV) supports a refinance that recovers your rehab costs.</p>
+    </details>
+
+    <details style="margin-bottom:16px;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface);">
+      <summary style="font-size:14px;font-weight:600;cursor:pointer;color:var(--text);">What is a good cash-on-cash return for a BRRRR deal?</summary>
+      <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-top:12px;">Most investors target 8-12% cash-on-cash return as a baseline for rental properties. For BRRRR deals, returns can be much higher because you are recovering capital through refinancing, reducing your cash basis. If you recover all invested capital, your cash-on-cash return becomes infinite, though this does not mean the deal is risk-free.</p>
+    </details>
+
+    <details style="margin-bottom:16px;border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--surface);">
+      <summary style="font-size:14px;font-weight:600;cursor:pointer;color:var(--text);">How does refinance LTV affect cash left in a BRRRR deal?</summary>
+      <p style="color:var(--muted);font-size:14px;line-height:1.8;margin-top:12px;">Loan-to-value (LTV) determines how much you can borrow against the property's appraised value at refinance. A 75% LTV on a $400,000 ARV gives you a $300,000 loan. If your original loan balance is $200,000 and refi closing costs are $6,000, you recover $94,000 in cash. Higher LTV means more cash out, but also higher monthly payments and potentially negative cash flow.</p>
+    </details>
+
+  </article>
 </main>
 
 <script>
