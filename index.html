@@ -1155,11 +1155,14 @@ function renderStressGrid(baseParams, rowAxis, colAxis, theadId, tbodyId) {
       stressed = colAxis.apply(stressed, cStep);
 
       var result = calcDeal(stressed);
-      var cls = cellClass(result.monthlyCashFlow, result.cashOnCash);
+      // Use post-refi numbers when BRRRR is active for honest stress testing
+      var cf = result.brrrrEnabled ? result.postRefiMonthlyCF : result.monthlyCashFlow;
+      var coc = result.brrrrEnabled ? result.postRefiCoC : result.cashOnCash;
+      var cls = cellClass(cf, coc);
 
       bodyHTML += '<td class="' + cls + '">' +
-        fmt2(result.monthlyCashFlow) + '/mo<br>' +
-        fmtPct(result.cashOnCash, 1) + ' CoC</td>';
+        fmt2(cf) + '/mo<br>' +
+        fmtPct(coc === Infinity ? 999 : coc, 1) + ' CoC</td>';
     }
     bodyHTML += '</tr>';
   }
@@ -1197,24 +1200,33 @@ function update() {
   var deal = calcDeal(p);
 
   // Stats row
-  var cfColor = deal.monthlyCashFlow >= 0 ? (deal.cashOnCash >= 8 ? 'green' : 'gold') : 'red';
+  // Show post-refi numbers in top stats when BRRRR is active
+  var topCF = deal.brrrrEnabled ? deal.postRefiMonthlyCF : deal.monthlyCashFlow;
+  var topAnnualCF = deal.brrrrEnabled ? deal.postRefiAnnualCF : deal.annualCashFlow;
+  var topCoC = deal.brrrrEnabled ? deal.postRefiCoC : deal.cashOnCash;
+  var topMtg = deal.brrrrEnabled ? deal.refiMonthlyPayment : deal.monthlyMortgage;
+  var topLoan = deal.brrrrEnabled ? deal.refiLoanAmount : deal.loanAmount;
+  var topRate = deal.brrrrEnabled ? p.refiRate : p.interestRate;
+  var topCocBasis = deal.brrrrEnabled ? deal.netCashLeftInDeal : deal.totalCashInvested;
+  var cfColor = topCF >= 0 ? (topCoC >= 8 ? 'green' : 'gold') : 'red';
   var roiColor = deal.annualizedROI >= 0 ? 'green' : 'red';
+  var cocDisplay = topCoC === Infinity ? 'Infinite' : fmtPct(topCoC, 1);
 
   document.getElementById('stats-row').innerHTML =
     '<div class="stat-card">' +
-      '<div class="label">Monthly Cash Flow</div>' +
-      '<div class="value ' + cfColor + '">' + fmt2(deal.monthlyCashFlow) + '</div>' +
-      '<div class="sub">' + fmt2(deal.annualCashFlow) + '/year</div>' +
+      '<div class="label">Monthly Cash Flow' + (deal.brrrrEnabled ? ' (Post-Refi)' : '') + '</div>' +
+      '<div class="value ' + cfColor + '">' + fmt2(topCF) + '</div>' +
+      '<div class="sub">' + fmt2(topAnnualCF) + '/year</div>' +
     '</div>' +
     '<div class="stat-card">' +
       '<div class="label">Cash-on-Cash Return</div>' +
-      '<div class="value ' + cfColor + '">' + fmtPct(deal.cashOnCash, 1) + '</div>' +
-      '<div class="sub">On ' + fmt(deal.totalCashInvested) + ' invested</div>' +
+      '<div class="value ' + cfColor + '">' + cocDisplay + '</div>' +
+      '<div class="sub">On ' + fmt(topCocBasis) + (deal.brrrrEnabled ? ' left in deal' : ' invested') + '</div>' +
     '</div>' +
     '<div class="stat-card">' +
-      '<div class="label">Mortgage Payment</div>' +
-      '<div class="value">' + fmt(deal.monthlyMortgage) + '</div>' +
-      '<div class="sub">' + fmt(deal.loanAmount) + ' loan | ' + fmtPct(p.interestRate, 1) + '</div>' +
+      '<div class="label">Mortgage Payment' + (deal.brrrrEnabled ? ' (Refi)' : '') + '</div>' +
+      '<div class="value">' + fmt(topMtg) + '</div>' +
+      '<div class="sub">' + fmt(topLoan) + ' loan | ' + fmtPct(topRate, 1) + '</div>' +
     '</div>' +
     '<div class="stat-card">' +
       '<div class="label">Annualized ROI</div>' +
