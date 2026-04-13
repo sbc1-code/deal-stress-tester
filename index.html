@@ -578,6 +578,36 @@
   }
   .source a { color: var(--accent); text-decoration: none; }
 
+  /* Ad container */
+  .ad-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 40px auto 0;
+    max-width: 320px;
+  }
+  .ad-unit__label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    opacity: 0.6;
+    margin-bottom: 8px;
+  }
+  .ad-unit__slot {
+    width: 300px;
+    min-height: 250px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 12px;
+    opacity: 0.5;
+  }
+
   .theme-toggle {
     position: fixed;
     top: 16px;
@@ -823,6 +853,16 @@
     <p>No backend, no database, no analytics, no cookies.</p>
     <p style="margin-top:6px;">Built by <a href="https://sbc1-code.github.io/portfolio/" target="_blank" rel="noopener noreferrer">Sebastian Becerra</a></p>
   </footer>
+
+  <!-- ADSTERRA: Native Banner Ad Unit (300x250) -->
+  <!-- ADSTERRA: Replace with ad code after approval -->
+  <div class="ad-unit" id="ad-native-banner" aria-label="Sponsored content">
+    <span class="ad-unit__label">Sponsored</span>
+    <div class="ad-unit__slot">
+      <script async="async" data-cfasync="false" src="https://pl29144493.profitablecpmratenetwork.com/38623b438448656f55dd47ec2b4b5cdb/invoke.js"></script>
+      <div id="container-38623b438448656f55dd47ec2b4b5cdb"></div>
+    </div>
+  </div>
 
   <!-- SEO Content Section -->
   <article style="max-width:800px;margin:48px auto 0;padding:0 24px;">
