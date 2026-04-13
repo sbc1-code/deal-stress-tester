@@ -88,7 +88,7 @@
   ]
 }
 </script>
-<script src="https://www.paypal.com/sdk/js?client-id=AQ5rPxIh98YI1eG4VABhfoBOV4zZ0v0eYH8hH5jPg0zru4JVN9iYJfNsdkUDqm86b18vTxFzq13Xb-nc&currency=USD" data-sdk-integration-source="button-factory" defer></script>
+<!-- PayPal SDK loaded lazily only when user clicks Remove Ads -->
 <style>
   :root {
     --bg: #0b0b0b;
@@ -431,142 +431,57 @@
     margin-top: 2px;
   }
 
-  /* Pro section */
-  .pro-badge {
-    display: inline-block;
-    background: var(--accent);
-    color: #fff;
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    margin-left: 8px;
-    vertical-align: middle;
-  }
-  .pro-locked {
-    position: relative;
-    overflow: hidden;
-  }
-  .pro-locked .pro-content {
-    filter: blur(4px);
-    pointer-events: none;
-    user-select: none;
-  }
-  .pro-locked .pro-gate {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: rgba(11, 11, 11, 0.7);
-    border-radius: 10px;
-    z-index: 10;
-    gap: 12px;
-  }
-  [data-theme="light"] .pro-locked .pro-gate,
-  :root:not([data-theme="dark"]) .pro-locked .pro-gate {
-    background: rgba(245, 243, 240, 0.7);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .pro-locked .pro-gate {
-      background: rgba(11, 11, 11, 0.7);
-    }
-  }
-  .pro-gate-text {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .pro-gate-sub {
-    font-size: 12px;
+  /* Remove Ads section */
+  .remove-ads-link {
+    font-size: 10px;
     color: var(--muted);
-    max-width: 280px;
-    text-align: center;
-    line-height: 1.5;
-  }
-  .pro-unlocked .pro-gate { display: none; }
-  .pro-unlocked .pro-content { filter: none; pointer-events: auto; user-select: auto; }
-
-  .key-display {
-    background: var(--surface2);
-    border: 1px solid var(--accent);
-    border-radius: 8px;
-    padding: 16px;
-    margin-top: 12px;
-    text-align: center;
-  }
-  .key-display .key-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-  .key-display .key-value {
-    font-family: monospace;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--accent);
-    word-break: break-all;
-    user-select: all;
-    cursor: text;
-  }
-  .key-display .key-note {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 8px;
-    line-height: 1.5;
-  }
-  .key-restore {
-    margin-top: 12px;
-    text-align: center;
-  }
-  .key-restore a {
-    color: var(--muted);
-    font-size: 12px;
-    text-decoration: underline;
+    opacity: 0.5;
+    text-decoration: none;
     cursor: pointer;
-  }
-  .key-restore-form {
-    display: none;
-    margin-top: 8px;
-    gap: 8px;
-    justify-content: center;
-    align-items: center;
-  }
-  .key-restore-form.visible { display: flex; }
-  .key-restore-form input {
-    font-family: monospace;
-    font-size: 13px;
-    padding: 8px 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    width: 200px;
-  }
-  .key-restore-form input:focus {
-    outline: 2px solid var(--accent);
-    border-color: var(--accent);
-  }
-  .key-restore-form button {
-    padding: 8px 16px;
-    background: var(--accent);
-    color: #fff;
+    margin-top: 4px;
+    background: none;
     border: none;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
     font-family: inherit;
   }
-  .key-restore-error {
-    color: var(--red);
-    font-size: 11px;
-    margin-top: 4px;
+  .remove-ads-link:hover { opacity: 0.8; }
+  .remove-ads-modal {
     display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+  }
+  .remove-ads-modal.visible { display: flex; }
+  .remove-ads-modal__box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 360px;
+    text-align: center;
+  }
+  .remove-ads-modal__box h3 {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .remove-ads-modal__box p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .remove-ads-modal__close {
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    margin-top: 12px;
+    display: inline-block;
+    background: none;
+    border: none;
+    font-family: inherit;
   }
 
   .source {
@@ -736,9 +651,9 @@
         </div>
       </div>
 
-      <!-- BRRRR Pro Inputs -->
+      <!-- BRRRR Cycle Inputs -->
       <div class="panel" style="margin-top:16px;" id="brrrr-inputs-panel">
-        <h2>BRRRR Cycle <span class="pro-badge">Pro</span></h2>
+        <h2>BRRRR Cycle</h2>
 
         <div class="control-group">
           <label for="rehabBudget">Rehab Budget <span class="val" id="v-rehab"></span></label>
@@ -789,30 +704,10 @@
         <div class="exit-grid" id="exit-analysis"></div>
       </div>
 
-      <!-- BRRRR Analysis (Pro) -->
-      <div class="panel exit-panel pro-locked" id="brrrr-panel">
-        <div class="pro-gate">
-          <div class="pro-gate-text">BRRRR Cycle Analysis</div>
-          <div class="pro-gate-sub">Rehab, refinance, and cash-out math. See exactly how much capital you recover and your true post-refi returns.</div>
-          <div id="paypal-button-container"></div>
-          <div class="key-restore">
-            <a id="restore-toggle" onclick="document.getElementById('restore-form').classList.toggle('visible')">Already purchased? Restore with your key</a>
-            <div class="key-restore-form" id="restore-form">
-              <input type="text" id="restore-key-input" placeholder="Paste your key">
-              <button onclick="restoreWithKey()">Unlock</button>
-            </div>
-            <div class="key-restore-error" id="restore-error">Invalid key. Check and try again.</div>
-          </div>
-        </div>
-        <div class="key-display" id="key-display" style="display:none;">
-          <div class="key-label">Your License Key</div>
-          <div class="key-value" id="key-value"></div>
-          <div class="key-note">Save this key. Use it to restore your purchase on any browser or device.</div>
-        </div>
-        <div class="pro-content">
-          <h2>BRRRR Analysis <span class="pro-badge">Pro</span></h2>
-          <div class="exit-grid" id="brrrr-analysis"></div>
-        </div>
+      <!-- BRRRR Analysis -->
+      <div class="panel exit-panel" id="brrrr-panel">
+        <h2>BRRRR Analysis</h2>
+        <div class="exit-grid" id="brrrr-analysis"></div>
       </div>
 
       <!-- Stress Test Heatmaps -->
@@ -854,13 +749,22 @@
     <p style="margin-top:6px;">Built by <a href="https://sbc1-code.github.io/portfolio/" target="_blank" rel="noopener noreferrer">Sebastian Becerra</a></p>
   </footer>
 
-  <!-- ADSTERRA: Native Banner Ad Unit (300x250) -->
-  <!-- ADSTERRA: Replace with ad code after approval -->
+  <!-- Ad Unit: only loads if user has not paid to remove ads -->
   <div class="ad-unit" id="ad-native-banner" aria-label="Sponsored content">
     <span class="ad-unit__label">Sponsored</span>
-    <div class="ad-unit__slot">
-      <script async="async" data-cfasync="false" src="https://pl29144493.profitablecpmratenetwork.com/38623b438448656f55dd47ec2b4b5cdb/invoke.js"></script>
-      <div id="container-38623b438448656f55dd47ec2b4b5cdb"></div>
+    <div class="ad-unit__slot" id="ad-slot">
+      <!-- Adsterra script injected by JS only if ads are enabled -->
+    </div>
+    <button class="remove-ads-link" onclick="showRemoveAdsModal()">Remove ads ($10)</button>
+  </div>
+
+  <!-- Remove Ads modal -->
+  <div class="remove-ads-modal" id="remove-ads-modal" role="dialog" aria-modal="true" aria-labelledby="remove-ads-title" onclick="if(event.target===this)closeRemoveAdsModal()">
+    <div class="remove-ads-modal__box">
+      <h3 id="remove-ads-title">Remove Ads</h3>
+      <p>One-time $10 payment. Ads are permanently removed on this device. No account needed, no data collected.</p>
+      <div id="paypal-button-container"></div>
+      <button class="remove-ads-modal__close" onclick="closeRemoveAdsModal()">Cancel</button>
     </div>
   </div>
 
@@ -1404,111 +1308,89 @@ document.getElementById('purchasePrice').addEventListener('input', function() {
   }
 });
 
-// --- License key generation ---
-// Simple hash: takes a string, returns a short hex key
-function generateKey(transactionId) {
-  var str = 'DST-PRO-' + transactionId;
-  var hash = 0;
-  for (var i = 0; i < str.length; i++) {
-    var ch = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + ch;
-    hash = hash & hash; // Convert to 32-bit int
+// --- Ad management ---
+var ADS_REMOVED_KEY = 'dst_ads_removed';
+
+function adsRemoved() {
+  try { return localStorage.getItem(ADS_REMOVED_KEY) === 'true'; }
+  catch(e) { return false; }
+}
+
+function loadAds() {
+  if (adsRemoved()) {
+    // User paid to remove ads: hide the entire ad unit
+    var adUnit = document.getElementById('ad-native-banner');
+    if (adUnit) adUnit.style.display = 'none';
+    return;
   }
-  // Create a readable key from the hash + transaction prefix
-  var hex = Math.abs(hash).toString(16).toUpperCase();
-  while (hex.length < 8) hex = '0' + hex;
-  return 'DST-' + hex.slice(0, 4) + '-' + hex.slice(4, 8);
-}
-
-function validateKey(key) {
-  // Key format: DST-XXXX-XXXX (hex chars)
-  return /^DST-[0-9A-F]{4}-[0-9A-F]{4}$/.test(key.trim().toUpperCase());
-}
-
-// --- Pro unlock ---
-var PRO_KEY = 'dst_pro_unlocked';
-var LICENSE_KEY = 'dst_license_key';
-
-function checkProUnlock() {
-  var unlocked = localStorage.getItem(PRO_KEY) === 'true';
-  var panel = document.getElementById('brrrr-panel');
-  if (unlocked) {
-    panel.classList.remove('pro-locked');
-    panel.classList.add('pro-unlocked');
-    // Show saved key if available
-    var savedKey = localStorage.getItem(LICENSE_KEY);
-    if (savedKey) {
-      document.getElementById('key-value').textContent = savedKey;
-      document.getElementById('key-display').style.display = 'block';
-    }
+  // Inject Adsterra script only when ads are active
+  var slot = document.getElementById('ad-slot');
+  if (slot && !slot.hasChildNodes()) {
+    var s = document.createElement('script');
+    s.async = true;
+    s.setAttribute('data-cfasync', 'false');
+    s.src = 'https://pl29144493.profitablecpmratenetwork.com/38623b438448656f55dd47ec2b4b5cdb/invoke.js';
+    var d = document.createElement('div');
+    d.id = 'container-38623b438448656f55dd47ec2b4b5cdb';
+    slot.appendChild(s);
+    slot.appendChild(d);
   }
 }
+loadAds();
 
-function unlockPro(licenseKey) {
-  localStorage.setItem(PRO_KEY, 'true');
-  if (licenseKey) {
-    localStorage.setItem(LICENSE_KEY, licenseKey);
-    document.getElementById('key-value').textContent = licenseKey;
-    document.getElementById('key-display').style.display = 'block';
-  }
-  checkProUnlock();
+// --- Remove Ads modal + PayPal ---
+function showRemoveAdsModal() {
+  document.getElementById('remove-ads-modal').classList.add('visible');
+  loadPayPalSDK();
 }
 
-function restoreWithKey() {
-  var input = document.getElementById('restore-key-input');
-  var error = document.getElementById('restore-error');
-  var key = input.value.trim().toUpperCase();
-  if (validateKey(key)) {
-    error.style.display = 'none';
-    unlockPro(key);
-  } else {
-    error.style.display = 'block';
-  }
+function closeRemoveAdsModal() {
+  document.getElementById('remove-ads-modal').classList.remove('visible');
 }
-checkProUnlock();
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeRemoveAdsModal();
+});
 
-// PayPal Smart Button - wait for SDK to load
+function removeAds() {
+  try { localStorage.setItem(ADS_REMOVED_KEY, 'true'); } catch(e) {}
+  var adUnit = document.getElementById('ad-native-banner');
+  if (adUnit) adUnit.style.display = 'none';
+  var slot = document.getElementById('ad-slot');
+  if (slot) slot.innerHTML = '';
+  closeRemoveAdsModal();
+}
+
+var paypalLoading = false;
+function loadPayPalSDK() {
+  if (window.paypal || paypalLoading) { renderPayPalButton(); return; }
+  paypalLoading = true;
+  var s = document.createElement('script');
+  s.src = 'https://www.paypal.com/sdk/js?client-id=AQ5rPxIh98YI1eG4VABhfoBOV4zZ0v0eYH8hH5jPg0zru4JVN9iYJfNsdkUDqm86b18vTxFzq13Xb-nc&currency=USD';
+  s.onload = function() { renderPayPalButton(); };
+  s.onerror = function() { paypalLoading = false; };
+  document.head.appendChild(s);
+}
+
 function renderPayPalButton() {
-  if (localStorage.getItem(PRO_KEY)) return;
+  if (!window.paypal) return;
   var container = document.getElementById('paypal-button-container');
   if (!container || container.childNodes.length > 0) return;
   paypal.Buttons({
-    style: {
-      shape: 'pill',
-      color: 'black',
-      layout: 'vertical',
-      label: 'pay'
-    },
+    style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'pay' },
     createOrder: function(data, actions) {
       return actions.order.create({
         purchase_units: [{
-          description: 'Deal Stress Tester Pro - BRRRR Cycle Analysis',
+          description: 'BRRRR Stress Test Calculator - Remove Ads',
           amount: { value: '10.00', currency_code: 'USD' }
         }]
       });
     },
     onApprove: function(data, actions) {
-      return actions.order.capture().then(function(details) {
-        var txnId = details.id || data.orderID || Date.now().toString();
-        var key = generateKey(txnId);
-        unlockPro(key);
-      });
+      return actions.order.capture().then(function() { removeAds(); });
     },
-    onError: function(err) {
-      console.error('PayPal error:', err);
-    }
+    onError: function(err) { console.error('PayPal error:', err); }
   }).render('#paypal-button-container');
 }
-// Try immediately, retry on script load, and poll as fallback
-if (window.paypal) {
-  renderPayPalButton();
-}
-var ppScript = document.querySelector('script[src*="paypal.com/sdk"]');
-if (ppScript) ppScript.addEventListener('load', function() { setTimeout(renderPayPalButton, 100); });
-// Fallback poll in case events fire out of order
-var ppPoll = setInterval(function() {
-  if (window.paypal) { clearInterval(ppPoll); renderPayPalButton(); }
-}, 500);
 
 // Initial render
 update();
