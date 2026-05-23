@@ -419,6 +419,27 @@
     color: var(--accent);
     background: rgba(138, 154, 123, 0.08);
   }
+  .scenario-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .action-btn-sm {
+    font-size: 11px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .action-btn-sm:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
   .action-btn {
     font-size: 12px;
     padding: 7px 14px;
@@ -856,7 +877,12 @@
       <button type="button" data-preset="sfrTurnkey" onclick="loadPreset('sfrTurnkey', this)">SFR turnkey</button>
       <button type="button" data-preset="condoFlip" onclick="loadPreset('condoFlip', this)">Condo flip</button>
     </div>
-    <button class="action-btn" type="button" onclick="window.print()" title="Print or save deal as PDF" aria-label="Save deal as PDF">Save as PDF</button>
+    <div class="scenario-actions">
+      <button class="action-btn-sm" type="button" onclick="saveScenario()" title="Download this deal as a JSON file you can re-load later or share">Save scenario</button>
+      <button class="action-btn-sm" type="button" onclick="document.getElementById('scenario-file-input').click()" title="Load a previously saved scenario file">Load scenario</button>
+      <input type="file" id="scenario-file-input" accept=".json,application/json" style="display:none" onchange="loadScenarioFile(event)" aria-label="Load scenario file" />
+      <button class="action-btn" type="button" onclick="window.print()" title="Print or save deal as PDF" aria-label="Save deal as PDF">Save as PDF</button>
+    </div>
   </div>
   <div class="stats-row" id="stats-row" role="region" aria-label="Key metrics summary"></div>
 
@@ -1820,6 +1846,67 @@ var DEAL_PRESETS = {
     rehabBudget: 35000, arv: 275000, refiTiming: 6, refiRate: 8, refiLtv: 75, refiClosing: 2.5
   }
 };
+
+var SCENARIO_INPUT_IDS = [
+  'purchasePrice', 'downPayment', 'interestRate', 'loanTerm',
+  'monthlyRent', 'vacancyRate', 'monthlyExpenses', 'capexReserve',
+  'closingBuy', 'closingSell', 'holdPeriod', 'appreciation', 'partners',
+  'rehabBudget', 'arv', 'refiTiming', 'refiRate', 'refiLtv', 'refiClosing'
+];
+
+function saveScenario() {
+  var data = {
+    version: 1,
+    tool: 'BRRRR Stress Test',
+    source: 'digito.technology',
+    savedAt: new Date().toISOString(),
+    inputs: {}
+  };
+  SCENARIO_INPUT_IDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) data.inputs[id] = el.value;
+  });
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var dateSlug = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = 'brrrr-scenario-' + dateSlug + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 200);
+}
+
+function loadScenarioFile(evt) {
+  var file = evt.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (!data || !data.inputs || typeof data.inputs !== 'object') {
+        throw new Error('Not a valid BRRRR scenario file.');
+      }
+      Object.keys(data.inputs).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.value = data.inputs[id];
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      update();
+      document.querySelectorAll('.sample-deals button').forEach(function(b) { b.classList.remove('active'); });
+      var stats = document.getElementById('stats-row');
+      if (stats && stats.scrollIntoView) stats.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      alert('Could not load scenario: ' + err.message);
+    }
+    evt.target.value = '';
+  };
+  reader.onerror = function() { alert('Could not read file.'); };
+  reader.readAsText(file);
+}
 
 function loadPreset(name, btnEl) {
   var preset = DEAL_PRESETS[name];
