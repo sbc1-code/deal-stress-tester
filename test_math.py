@@ -146,9 +146,145 @@ def test_declining_market():
     assert r['sale'] < 250000, "Sale should be below purchase in declining market"
     assert r['total_profit'] < 0, "Should lose money in declining market with negative CF"
 
+# === Verdict interpretation (port of JS interpret*() in index.html) ===
+# Keep these in lock-step with the JS thresholds. Boundary tests below.
+
+INFINITY = float('inf')
+
+def interpret_cf(cf):
+    if cf >= 200: return 'good'
+    if cf >= 50: return 'warn'
+    if cf >= 0: return 'warn'
+    return 'bad'
+
+def interpret_coc(coc):
+    if coc == INFINITY: return 'good'
+    if coc >= 12: return 'good'
+    if coc >= 8: return 'good'
+    if coc >= 5: return 'warn'
+    if coc >= 0: return 'warn'
+    return 'bad'
+
+def interpret_mortgage(rent, mortgage):
+    if mortgage == 0: return 'good'
+    if rent == 0: return None
+    ratio = (mortgage / rent) * 100
+    if ratio < 50: return 'good'
+    if ratio < 80: return 'warn'
+    return 'bad'
+
+def interpret_roi(roi):
+    if roi >= 15: return 'good'
+    if roi >= 8: return 'good'
+    if roi >= 4: return 'warn'
+    if roi >= 0: return 'warn'
+    return 'bad'
+
+def interpret_exit_profit(profit, invested):
+    if profit < 0: return 'bad'
+    if invested <= 0: return None
+    multiple = profit / invested
+    if multiple >= 1: return 'good'
+    if multiple >= 0.5: return 'good'
+    if multiple >= 0.1: return 'warn'
+    return 'warn'
+
+def interpret_hourly(hr):
+    if hr < 0: return 'bad'
+    if hr >= 50: return 'good'
+    if hr >= 25: return 'warn'
+    if hr >= 10: return 'warn'
+    return 'bad'
+
+def interpret_net_sale(net, invested):
+    if net < 0: return 'bad'
+    if invested > 0 and net < invested: return 'warn'
+    return None
+
+# === Verdict boundary tests ===
+
+def test_verdict_cf_boundaries():
+    assert interpret_cf(500) == 'good'
+    assert interpret_cf(200) == 'good'       # exactly at good cutoff
+    assert interpret_cf(199.99) == 'warn'    # just below
+    assert interpret_cf(50) == 'warn'
+    assert interpret_cf(0) == 'warn'         # breakeven still warn
+    assert interpret_cf(-0.01) == 'bad'
+    assert interpret_cf(-1000) == 'bad'
+
+def test_verdict_coc_boundaries():
+    assert interpret_coc(INFINITY) == 'good'
+    assert interpret_coc(20) == 'good'
+    assert interpret_coc(12) == 'good'
+    assert interpret_coc(11.99) == 'good'    # still good above 8
+    assert interpret_coc(8) == 'good'
+    assert interpret_coc(7.99) == 'warn'
+    assert interpret_coc(5) == 'warn'
+    assert interpret_coc(0) == 'warn'
+    assert interpret_coc(-0.01) == 'bad'
+    assert interpret_coc(-50) == 'bad'
+
+def test_verdict_mortgage_boundaries():
+    assert interpret_mortgage(2000, 0) == 'good'        # cash buy
+    assert interpret_mortgage(0, 1000) is None          # no rent edge case
+    assert interpret_mortgage(2000, 999) == 'good'      # 49.95% ratio
+    assert interpret_mortgage(2000, 1000) == 'warn'     # exactly 50%
+    assert interpret_mortgage(2000, 1599) == 'warn'     # 79.95%
+    assert interpret_mortgage(2000, 1600) == 'bad'      # exactly 80%
+    assert interpret_mortgage(2000, 3000) == 'bad'      # 150%
+
+def test_verdict_roi_boundaries():
+    assert interpret_roi(20) == 'good'
+    assert interpret_roi(15) == 'good'
+    assert interpret_roi(8) == 'good'
+    assert interpret_roi(7.99) == 'warn'
+    assert interpret_roi(4) == 'warn'
+    assert interpret_roi(0) == 'warn'
+    assert interpret_roi(-0.01) == 'bad'
+
+def test_verdict_exit_profit_boundaries():
+    assert interpret_exit_profit(-1, 100000) == 'bad'
+    assert interpret_exit_profit(0, 0) is None          # zero invested edge
+    assert interpret_exit_profit(100000, 100000) == 'good'   # 1.0 multiple
+    assert interpret_exit_profit(50000, 100000) == 'good'    # 0.5 multiple
+    assert interpret_exit_profit(49999, 100000) == 'warn'    # just below 0.5
+    assert interpret_exit_profit(10000, 100000) == 'warn'    # 0.1 multiple
+    assert interpret_exit_profit(5000, 100000) == 'warn'     # below 0.1
+
+def test_verdict_hourly_boundaries():
+    assert interpret_hourly(100) == 'good'
+    assert interpret_hourly(50) == 'good'
+    assert interpret_hourly(49.99) == 'warn'
+    assert interpret_hourly(25) == 'warn'
+    assert interpret_hourly(10) == 'warn'
+    assert interpret_hourly(9.99) == 'bad'
+    assert interpret_hourly(0) == 'bad'
+    assert interpret_hourly(-1) == 'bad'
+
+def test_verdict_net_sale_boundaries():
+    assert interpret_net_sale(-1, 100000) == 'bad'
+    assert interpret_net_sale(0, 100000) == 'warn'      # zero proceeds, lost the invested
+    assert interpret_net_sale(50000, 100000) == 'warn'  # exit with less than put in
+    assert interpret_net_sale(100000, 100000) is None   # break even -> no opinion
+    assert interpret_net_sale(200000, 100000) is None   # positive -> profit interp covers it
+    assert interpret_net_sale(50000, 0) is None         # zero invested edge
+
+def test_verdict_real_4plex_deal_voice():
+    # Sebastian's real 4plex: bought $130K, rehab $108K, refi $280K, sold $400K,
+    # netted ~$15K over 4.5 yrs, effective hourly < $6
+    # Make sure the verdicts read the way the README story does.
+    assert interpret_hourly(6) == 'bad'   # "sub-minimum wage" — matches story
+    assert interpret_cf(-9) == 'bad'      # default-deal cash flow is -$9, should be bad
+    assert interpret_exit_profit(15000, 84000) == 'warn'  # ~0.18 multiple
+    assert interpret_net_sale(-3377, 84000) == 'bad'      # negative cash-out per current default
+
 if __name__ == '__main__':
     tests = [test_default_no_brrrr, test_brrrr_uses_arv, test_real_4plex,
-             test_zero_rate, test_cash_buy, test_declining_market]
+             test_zero_rate, test_cash_buy, test_declining_market,
+             test_verdict_cf_boundaries, test_verdict_coc_boundaries,
+             test_verdict_mortgage_boundaries, test_verdict_roi_boundaries,
+             test_verdict_exit_profit_boundaries, test_verdict_hourly_boundaries,
+             test_verdict_net_sale_boundaries, test_verdict_real_4plex_deal_voice]
     passed = 0
     for t in tests:
         try:
