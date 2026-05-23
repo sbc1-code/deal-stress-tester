@@ -613,6 +613,33 @@
   }
   .stress-grid tbody tr:hover td { background: rgba(255,255,255,0.02); }
   .stress-grid tbody tr:hover td:first-child { background: var(--surface2); }
+  .stress-grid tbody td.stress-cell {
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.15s, outline-color 0.15s;
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+  }
+  .stress-grid tbody td.stress-cell:hover {
+    filter: brightness(1.25);
+    outline-color: var(--accent);
+  }
+  .stress-grid tbody td.stress-cell:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .stress-grid tbody td.stress-cell.is-base {
+    cursor: default;
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+  .stress-grid tbody td.stress-cell.is-base:hover {
+    filter: none;
+    outline-color: transparent;
+  }
+  .stress-grid tbody td.repivoting {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    filter: brightness(1.4);
+  }
 
   .cell-green {
     background: rgba(138, 154, 123, 0.15);
@@ -1044,7 +1071,7 @@
       <div class="panel stress-section">
         <h2>Stress Test</h2>
         <h3>Where does this deal break?</h3>
-        <p class="stress-sub">Each cell shows monthly cash flow and cash-on-cash return under different scenarios. Green is strong, gold is marginal, red means the deal loses money.</p>
+        <p class="stress-sub">Each cell shows monthly cash flow and cash-on-cash return under different scenarios. Green is strong, gold is marginal, red means the deal loses money. <strong style="color:var(--accent);font-weight:600;">Click any cell to set it as your new base case</strong> and see the deal re-pivot.</p>
 
         <div class="legend" role="list" aria-label="Heatmap color legend" style="margin-bottom:20px">
           <div class="legend-item" role="listitem"><div class="legend-dot" style="background:var(--green);"></div> Positive cash flow, 8%+ CoC</div>
@@ -1367,6 +1394,8 @@ var stressAxes = {
   vacancy: {
     label: 'Vacancy',
     steps: [0, 5, 10, 15],
+    targetParam: 'vacancyRate',
+    targetId: 'vacancyRate',
     apply: function(params, delta) {
       var copy = {};
       for (var k in params) copy[k] = params[k];
@@ -1378,6 +1407,8 @@ var stressAxes = {
   rate: {
     label: 'Rate',
     steps: [0, 1, 2, 3],
+    targetParam: 'interestRate',
+    targetId: 'interestRate',
     apply: function(params, delta) {
       var copy = {};
       for (var k in params) copy[k] = params[k];
@@ -1389,6 +1420,8 @@ var stressAxes = {
   rent: {
     label: 'Rent',
     steps: [0, 5, 10, 15],
+    targetParam: 'monthlyRent',
+    targetId: 'monthlyRent',
     apply: function(params, delta) {
       var copy = {};
       for (var k in params) copy[k] = params[k];
@@ -1400,6 +1433,8 @@ var stressAxes = {
   expense: {
     label: 'Expenses',
     steps: [0, 10, 20, 30],
+    targetParam: 'monthlyExpenses',
+    targetId: 'monthlyExpenses',
     apply: function(params, delta) {
       var copy = {};
       for (var k in params) copy[k] = params[k];
@@ -1409,6 +1444,38 @@ var stressAxes = {
     format: function(d) { return d === 0 ? 'Base' : '+' + d + '%'; }
   }
 };
+
+// --- Click-to-repivot from stress cell ---
+function setInputValueClamped(id, val) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var step = parseFloat(el.step || '1');
+  var min = parseFloat(el.min);
+  var max = parseFloat(el.max);
+  var snapped = Math.round(val / step) * step;
+  if (!isNaN(min) && snapped < min) snapped = min;
+  if (!isNaN(max) && snapped > max) snapped = max;
+  el.value = snapped;
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function repivotFromCell(td) {
+  if (!td || td.classList.contains('is-base')) return;
+  var rowId = td.getAttribute('data-repivot-row-id');
+  var rowVal = parseFloat(td.getAttribute('data-repivot-row-val'));
+  var colId = td.getAttribute('data-repivot-col-id');
+  var colVal = parseFloat(td.getAttribute('data-repivot-col-val'));
+  if (!rowId || !colId || isNaN(rowVal) || isNaN(colVal)) return;
+  setInputValueClamped(rowId, rowVal);
+  setInputValueClamped(colId, colVal);
+  update();
+  td.classList.add('repivoting');
+  setTimeout(function() { td.classList.remove('repivoting'); }, 600);
+  var stats = document.getElementById('stats-row');
+  if (stats && stats.scrollIntoView) stats.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.sample-deals button').forEach(function(b) { b.classList.remove('active'); });
+}
 
 // --- Cell classification ---
 function cellClass(monthlyCF, coc) {
@@ -1444,7 +1511,25 @@ function renderStressGrid(baseParams, rowAxis, colAxis, theadId, tbodyId) {
       var coc = result.brrrrEnabled ? result.postRefiCoC : result.cashOnCash;
       var cls = cellClass(cf, coc);
 
-      bodyHTML += '<td class="' + cls + '">' +
+      var isBase = (rStep === 0 && cStep === 0);
+      var dataAttrs = '';
+      var clickAttr = '';
+      var ariaAttr = '';
+      if (rowAxis.targetId && colAxis.targetId && rowAxis.targetParam && colAxis.targetParam) {
+        var rowTargetVal = stressed[rowAxis.targetParam];
+        var colTargetVal = stressed[colAxis.targetParam];
+        dataAttrs = ' data-repivot-row-id="' + rowAxis.targetId + '" data-repivot-row-val="' + rowTargetVal +
+                    '" data-repivot-col-id="' + colAxis.targetId + '" data-repivot-col-val="' + colTargetVal + '"';
+        if (!isBase) {
+          clickAttr = ' onclick="repivotFromCell(this)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();repivotFromCell(this);}" tabindex="0" role="button"';
+          ariaAttr = ' aria-label="Set as base case: ' + rowAxis.label + ' ' + rowAxis.format(rStep) + ', ' + colAxis.label + ' ' + colAxis.format(cStep) + '"';
+        } else {
+          ariaAttr = ' aria-label="Current base case"';
+        }
+      }
+      var classes = cls + ' stress-cell' + (isBase ? ' is-base' : '');
+
+      bodyHTML += '<td class="' + classes + '"' + dataAttrs + clickAttr + ariaAttr + '>' +
         fmt2(cf) + '/mo<br>' +
         fmtPct(coc === Infinity ? 999 : coc, 1) + ' CoC</td>';
     }
