@@ -303,6 +303,21 @@
   .stat-card .value.gold { color: var(--gold); }
   .stat-card .value.red { color: var(--red); }
   .stat-card .value.accent { color: var(--accent); }
+  .stat-card .insight,
+  .exit-item .insight {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    line-height: 1.45;
+  }
+  .stat-card .insight.good,
+  .exit-item .insight.good { color: var(--green); border-top-color: rgba(138, 154, 123, 0.25); }
+  .stat-card .insight.warn,
+  .exit-item .insight.warn { color: var(--gold); border-top-color: rgba(184, 166, 126, 0.25); }
+  .stat-card .insight.bad,
+  .exit-item .insight.bad { color: var(--red); border-top-color: rgba(168, 84, 84, 0.25); }
 
   /* Stress test grid */
   .stress-section { margin-top: 16px; }
@@ -1181,6 +1196,62 @@ function renderStressGrid(baseParams, rowAxis, colAxis, theadId, tbodyId) {
 }
 
 // --- Main update ---
+// --- Plain-English interpretation (decision-grade, not academic) ---
+function interpretCF(cf, mortgage) {
+  if (cf >= 200) return {text: 'Cushioned against vacancy and small surprises.', tone: 'good'};
+  if (cf >= 50) return {text: 'Razor thin. One bad month wipes the year.', tone: 'warn'};
+  if (cf >= 0) return {text: 'Breakeven. Betting on appreciation, not cash flow.', tone: 'warn'};
+  return {text: 'Bleeding cash monthly. Numbers need to change.', tone: 'bad'};
+}
+function interpretCoC(coc) {
+  if (coc === Infinity) return {text: 'Capital fully recovered. Infinite return on remaining cash.', tone: 'good'};
+  if (coc >= 12) return {text: 'Strong yield. Most investors target 8-12%, you are above.', tone: 'good'};
+  if (coc >= 8) return {text: 'Healthy. At benchmark for long-term holds.', tone: 'good'};
+  if (coc >= 5) return {text: 'Modest. Below the 8% most investors target.', tone: 'warn'};
+  if (coc >= 0) return {text: 'Low yield. Bonds pay better at this risk level.', tone: 'warn'};
+  return {text: 'Negative yield. Losing money before you sell.', tone: 'bad'};
+}
+function interpretMortgage(rent, mortgage) {
+  if (mortgage === 0) return {text: 'Cash buy. No debt service to cover.', tone: 'good'};
+  if (rent === 0) return null;
+  var ratio = (mortgage / rent) * 100;
+  if (ratio < 50) return {text: 'Comfortable coverage. Rent has room to drop.', tone: 'good'};
+  if (ratio < 80) return {text: 'Standard ratio. Watch vacancy carefully.', tone: 'warn'};
+  return {text: 'Tight coverage. Vacancy quickly turns this negative.', tone: 'bad'};
+}
+function interpretROI(roi) {
+  if (roi >= 15) return {text: 'Beats S&P long-term average. Strong if assumptions hold.', tone: 'good'};
+  if (roi >= 8) return {text: 'Above stock-market average. Decent for the work involved.', tone: 'good'};
+  if (roi >= 4) return {text: 'Below stock-market average. Question whether the time pays off.', tone: 'warn'};
+  if (roi >= 0) return {text: 'T-bills beat this without the tenant calls.', tone: 'warn'};
+  return {text: 'Net loss over hold. Do not close.', tone: 'bad'};
+}
+function interpretExitProfit(profit, invested) {
+  if (profit < 0) return {text: 'You exit at a loss. Cash flow did not cover the sale shortfall.', tone: 'bad'};
+  if (invested <= 0) return null;
+  var multiple = profit / invested;
+  if (multiple >= 1) return {text: 'You more than doubled your cash. Strong equity build.', tone: 'good'};
+  if (multiple >= 0.5) return {text: 'Solid gain. You walk away with real money.', tone: 'good'};
+  if (multiple >= 0.1) return {text: 'Small profit. Better than a loss, worse than the market.', tone: 'warn'};
+  return {text: 'Profit basically zero. Years of work for nothing meaningful.', tone: 'warn'};
+}
+function interpretHourly(hr) {
+  if (hr < 0) return {text: 'You are paying for the privilege of managing this.', tone: 'bad'};
+  if (hr >= 50) return {text: 'Above median professional wage. Time well spent.', tone: 'good'};
+  if (hr >= 25) return {text: 'Decent skilled-trade rate.', tone: 'warn'};
+  if (hr >= 10) return {text: 'Below most real jobs. Your time is the cost here.', tone: 'warn'};
+  return {text: 'Sub-minimum wage. McDonald\'s pays better.', tone: 'bad'};
+}
+function interpretNetSale(net, invested) {
+  if (net < 0) return {text: 'Sale does not cover the mortgage payoff.', tone: 'bad'};
+  if (invested > 0 && net < invested) return {text: 'You exit with less than you put in.', tone: 'warn'};
+  return null;
+}
+function insightHTML(interp) {
+  if (!interp) return '';
+  return '<div class="insight ' + interp.tone + '">' + interp.text + '</div>';
+}
+
 function update() {
   var p = getParams();
 
@@ -1227,21 +1298,25 @@ function update() {
       '<div class="label">Monthly Cash Flow' + (deal.brrrrEnabled ? ' (Post-Refi)' : '') + '</div>' +
       '<div class="value ' + cfColor + '">' + fmt2(topCF) + '</div>' +
       '<div class="sub">' + fmt2(topAnnualCF) + '/year</div>' +
+      insightHTML(interpretCF(topCF, topMtg)) +
     '</div>' +
     '<div class="stat-card">' +
       '<div class="label">Cash-on-Cash Return</div>' +
       '<div class="value ' + cfColor + '">' + cocDisplay + '</div>' +
       '<div class="sub">On ' + fmt(topCocBasis) + (deal.brrrrEnabled ? ' left in deal' : ' invested') + '</div>' +
+      insightHTML(interpretCoC(topCoC)) +
     '</div>' +
     '<div class="stat-card">' +
       '<div class="label">Mortgage Payment' + (deal.brrrrEnabled ? ' (Refi)' : '') + '</div>' +
       '<div class="value">' + fmt(topMtg) + '</div>' +
       '<div class="sub">' + fmt(topLoan) + ' loan | ' + fmtPct(topRate, 1) + '</div>' +
+      insightHTML(interpretMortgage(p.monthlyRent, topMtg)) +
     '</div>' +
     '<div class="stat-card">' +
       '<div class="label">Annualized ROI</div>' +
       '<div class="value ' + roiColor + '">' + fmtPct(deal.annualizedROI, 1) + '</div>' +
       '<div class="sub">Over ' + p.holdPeriod + ' year' + (p.holdPeriod === 1 ? '' : 's') + '</div>' +
+      insightHTML(interpretROI(deal.annualizedROI)) +
     '</div>';
 
   // Base case panel
@@ -1291,11 +1366,13 @@ function update() {
       '<div class="exit-label">Net Sale Proceeds</div>' +
       '<div class="exit-value" style="color:' + (exitProceeds >= 0 ? 'var(--green)' : 'var(--red)') + '">' + fmt2(exitProceeds) + '</div>' +
       '<div class="exit-sub">After ' + (useBrrrr ? 'refi ' : '') + 'mortgage payoff + ' + p.closingSellPct + '% sell costs</div>' +
+      insightHTML(interpretNetSale(exitProceeds, deal.totalCashInvested)) +
     '</div>' +
     '<div class="exit-item">' +
       '<div class="exit-label">Total Profit' + partnerNote + '</div>' +
       '<div class="exit-value" style="color:' + (exitProfit >= 0 ? 'var(--green)' : 'var(--red)') + '">' + fmt2(exitProfit) + '</div>' +
       '<div class="exit-sub">Cash flow + sale proceeds - invested</div>' +
+      insightHTML(interpretExitProfit(exitProfit, deal.totalCashInvested)) +
     '</div>' +
     '<div class="exit-item">' +
       '<div class="exit-label">Cash Flow Over Hold</div>' +
@@ -1306,6 +1383,7 @@ function update() {
       '<div class="exit-label">Effective Hourly Rate</div>' +
       '<div class="exit-value" style="color:var(--' + hourlyColor + ')">' + fmt2(deal.effectiveHourly) + '/hr</div>' +
       '<div class="exit-sub">Assumes 5 hrs/mo management (' + deal.totalHours.toLocaleString() + ' total hrs)</div>' +
+      insightHTML(interpretHourly(deal.effectiveHourly)) +
     '</div>';
 
   // BRRRR analysis panel
