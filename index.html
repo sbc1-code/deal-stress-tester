@@ -88,7 +88,7 @@
   ]
 }
 </script>
-<!-- PayPal SDK loaded lazily only when user clicks Remove Ads -->
+<!-- Lemon Squeezy: checkout opens in new tab, license activation uses public API -->
 <style>
   :root {
     --bg: #0b0b0b;
@@ -483,6 +483,65 @@
     border: none;
     font-family: inherit;
   }
+  .ls-buy-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s;
+  }
+  .ls-buy-btn:hover { opacity: 0.9; }
+  .ls-divider {
+    font-size: 11px;
+    color: var(--muted);
+    margin: 18px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .ls-activate-row {
+    display: flex;
+    gap: 6px;
+  }
+  .ls-activate-row input {
+    flex: 1;
+    padding: 9px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 12px;
+    font-family: monospace;
+    min-width: 0;
+  }
+  .ls-activate-row input:focus { outline: none; border-color: var(--accent); }
+  .ls-activate-row button {
+    padding: 9px 14px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .ls-activate-row button:hover { border-color: var(--accent); }
+  .ls-status {
+    font-size: 11px;
+    margin-top: 10px;
+    min-height: 14px;
+    color: var(--muted);
+  }
+  .ls-status.err { color: #d97c7c; }
+  .ls-status.ok { color: var(--accent); }
 
   .source {
     text-align: center;
@@ -763,8 +822,14 @@
   <div class="remove-ads-modal" id="remove-ads-modal" role="dialog" aria-modal="true" aria-labelledby="remove-ads-title" onclick="if(event.target===this)closeRemoveAdsModal()">
     <div class="remove-ads-modal__box">
       <h3 id="remove-ads-title">Remove Ads</h3>
-      <p>One-time $10 payment. Ads are permanently removed on this device. No account needed, no data collected.</p>
-      <div id="paypal-button-container"></div>
+      <p>$10 one-time. Lifetime license, up to 5 devices. No account needed. License key emailed instantly.</p>
+      <a href="https://digito-tech.lemonsqueezy.com/checkout/buy/4f791754-73a5-4a1f-909a-850a28255170" target="_blank" rel="noopener noreferrer" class="ls-buy-btn">Buy now &middot; $10</a>
+      <div class="ls-divider">Already have a key?</div>
+      <div class="ls-activate-row">
+        <input type="text" id="license-key-input" placeholder="Paste license key" autocomplete="off" spellcheck="false" aria-label="License key" />
+        <button type="button" onclick="activateLicense()">Activate</button>
+      </div>
+      <div id="license-status" class="ls-status" role="status" aria-live="polite"></div>
       <button class="remove-ads-modal__close" onclick="closeRemoveAdsModal()">Cancel</button>
     </div>
   </div>
@@ -1339,14 +1404,17 @@ function loadAds() {
 }
 loadAds();
 
-// --- Remove Ads modal + PayPal ---
+// --- Remove Ads modal ---
 function showRemoveAdsModal() {
   document.getElementById('remove-ads-modal').classList.add('visible');
-  loadPayPalSDK();
+  var input = document.getElementById('license-key-input');
+  if (input) setTimeout(function() { input.focus(); }, 50);
 }
 
 function closeRemoveAdsModal() {
   document.getElementById('remove-ads-modal').classList.remove('visible');
+  var statusEl = document.getElementById('license-status');
+  if (statusEl) { statusEl.textContent = ''; statusEl.className = 'ls-status'; }
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeRemoveAdsModal();
@@ -1361,36 +1429,54 @@ function removeAds() {
   closeRemoveAdsModal();
 }
 
-var paypalLoading = false;
-function loadPayPalSDK() {
-  if (window.paypal || paypalLoading) { renderPayPalButton(); return; }
-  paypalLoading = true;
-  var s = document.createElement('script');
-  s.src = 'https://www.paypal.com/sdk/js?client-id=AQ5rPxIh98YI1eG4VABhfoBOV4zZ0v0eYH8hH5jPg0zru4JVN9iYJfNsdkUDqm86b18vTxFzq13Xb-nc&currency=USD';
-  s.onload = function() { renderPayPalButton(); };
-  s.onerror = function() { paypalLoading = false; };
-  document.head.appendChild(s);
-}
+// --- Lemon Squeezy license activation ---
+var LS_PRODUCT_ID = '1079582';
+var LS_LICENSE_KEY_STORAGE = 'dst_license_key';
+var LS_INSTANCE_ID_STORAGE = 'dst_license_instance_id';
 
-function renderPayPalButton() {
-  if (!window.paypal) return;
-  var container = document.getElementById('paypal-button-container');
-  if (!container || container.childNodes.length > 0) return;
-  paypal.Buttons({
-    style: { shape: 'pill', color: 'black', layout: 'vertical', label: 'pay' },
-    createOrder: function(data, actions) {
-      return actions.order.create({
-        purchase_units: [{
-          description: 'BRRRR Stress Test Calculator - Remove Ads',
-          amount: { value: '10.00', currency_code: 'USD' }
-        }]
-      });
-    },
-    onApprove: function(data, actions) {
-      return actions.order.capture().then(function() { removeAds(); });
-    },
-    onError: function(err) { console.error('PayPal error:', err); }
-  }).render('#paypal-button-container');
+function activateLicense() {
+  var input = document.getElementById('license-key-input');
+  var statusEl = document.getElementById('license-status');
+  var key = (input && input.value ? input.value : '').trim();
+  if (!key) {
+    statusEl.textContent = 'Paste your license key first.';
+    statusEl.className = 'ls-status err';
+    return;
+  }
+  statusEl.textContent = 'Activating...';
+  statusEl.className = 'ls-status';
+  var instanceName = 'BRRRR ' + (navigator.userAgent || '').slice(0, 50) + ' ' + new Date().toISOString().slice(0, 10);
+  fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ license_key: key, instance_name: instanceName }).toString()
+  }).then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (!data || data.valid !== true) {
+        var msg = (data && data.error) ? data.error : 'Invalid license key.';
+        statusEl.textContent = msg;
+        statusEl.className = 'ls-status err';
+        return;
+      }
+      var productId = data.meta && (data.meta.product_id || data.meta.product_id === 0) ? String(data.meta.product_id) : '';
+      if (productId !== LS_PRODUCT_ID) {
+        statusEl.textContent = 'This license is for a different product.';
+        statusEl.className = 'ls-status err';
+        return;
+      }
+      try {
+        localStorage.setItem(LS_LICENSE_KEY_STORAGE, key);
+        if (data.instance && data.instance.id) localStorage.setItem(LS_INSTANCE_ID_STORAGE, data.instance.id);
+        localStorage.setItem(ADS_REMOVED_KEY, 'true');
+      } catch (e) {}
+      statusEl.textContent = 'Activated. Ad-free now.';
+      statusEl.className = 'ls-status ok';
+      setTimeout(removeAds, 700);
+    })
+    .catch(function() {
+      statusEl.textContent = 'Network error. Try again.';
+      statusEl.className = 'ls-status err';
+    });
 }
 
 // Initial render
