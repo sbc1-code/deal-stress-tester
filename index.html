@@ -377,6 +377,129 @@
     visibility: visible;
   }
 
+  /* Page actions row */
+  .page-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .action-btn {
+    font-size: 12px;
+    padding: 7px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .action-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Print-only header / footer (hidden in screen view) */
+  .print-only { display: none; }
+
+  /* Print styles: clean one-pager for PDF export */
+  @media print {
+    @page { size: letter; margin: 0.5in; }
+    body {
+      background: white !important;
+      color: black !important;
+      font-size: 10.5pt;
+    }
+    .theme-toggle,
+    .ad-unit,
+    .remove-ads-modal,
+    .page-actions,
+    article,
+    .source,
+    footer {
+      display: none !important;
+    }
+    .print-only { display: block !important; }
+    .print-header {
+      text-align: left;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #111;
+    }
+    .print-header h1 {
+      font-size: 18pt;
+      font-weight: 700;
+      color: #111;
+      margin: 0 0 4px;
+    }
+    .print-header .print-sub {
+      font-size: 10pt;
+      color: #555;
+    }
+    .print-footer {
+      margin-top: 24px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      font-size: 9pt;
+      color: #666;
+      text-align: center;
+    }
+    /* Hide the original screen h1 so it doesn't duplicate */
+    main > h1 { display: none !important; }
+    /* Cards / panels: white bg, gray borders */
+    .panel, .stat-card, .exit-item, .stress-grid-container {
+      background: white !important;
+      border: 1px solid #d0d0d0 !important;
+      color: black !important;
+      page-break-inside: avoid;
+    }
+    .panel { box-shadow: none !important; padding: 12px !important; }
+    .stat-card .label, .exit-item .exit-label, .stat-card .sub, .exit-item .exit-sub {
+      color: #555 !important;
+    }
+    .stat-card .value, .exit-item .exit-value {
+      color: #111 !important;
+    }
+    /* Preserve semantic verdict colors but darken for paper */
+    .stat-card .value.green, .exit-item .exit-value[style*="--green"] { color: #3f5a35 !important; }
+    .stat-card .value.gold { color: #826325 !important; }
+    .stat-card .value.red, .exit-item .exit-value[style*="--red"] { color: #863434 !important; }
+    .stat-card .insight, .exit-item .insight {
+      color: #444 !important;
+      border-top-color: #ddd !important;
+    }
+    .stat-card .insight.good, .exit-item .insight.good { color: #3f5a35 !important; }
+    .stat-card .insight.warn, .exit-item .insight.warn { color: #826325 !important; }
+    .stat-card .insight.bad, .exit-item .insight.bad { color: #863434 !important; }
+    /* Stress grid: paper-friendly */
+    .stress-grid thead th { background: #f0f0f0 !important; color: #333 !important; }
+    .stress-grid tbody td { color: #111 !important; border-color: #ddd !important; }
+    .stress-grid tbody td:first-child { background: #f7f7f7 !important; }
+    .cell-green { background: #e1eadc !important; color: #2d4326 !important; }
+    .cell-gold  { background: #f0e8d3 !important; color: #6c521e !important; }
+    .cell-red   { background: #ecd7d7 !important; color: #6a2828 !important; }
+    /* Hide sliders, show only label + computed value */
+    input[type="range"] { display: none !important; }
+    select { border: none !important; background: transparent !important; appearance: none !important; padding: 0 !important; font-weight: 600; color: #111 !important; }
+    /* Tooltips - kill */
+    .term-help { border-bottom: none !important; }
+    .term-help::after, .term-help::before { display: none !important; }
+    /* Don't break inside individual cards */
+    .stress-section { page-break-inside: avoid; }
+    /* Compact input rows */
+    label .val { color: #111 !important; font-weight: 600; }
+    /* Headings */
+    h1, h2, h3 { color: #111 !important; }
+    h2 { font-size: 12pt !important; margin-bottom: 8px !important; }
+    /* Stats row: ensure 4 across on letter paper */
+    .stats-row { grid-template-columns: repeat(4, 1fr) !important; gap: 8px !important; }
+    .stat-card { padding: 10px 12px !important; }
+    .stat-card .value { font-size: 15pt !important; }
+    /* Exit grid stays 2 col */
+    .exit-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  }
+
   /* Stress test grid */
   .stress-section { margin-top: 16px; }
   .stress-section h3 {
@@ -687,6 +810,13 @@
   <h1><span>BRRRR</span> Stress Test Calculator</h1>
   <p class="subtitle">Plug in your numbers. See where the deal breaks before you buy. Free, no signup, no tracking.</p>
 
+  <div class="print-only print-header">
+    <h1>BRRRR Stress Test &middot; Deal Analysis</h1>
+    <div class="print-sub">Generated <span id="print-date"></span> &middot; digito.technology</div>
+  </div>
+  <div class="page-actions">
+    <button class="action-btn" type="button" onclick="window.print()" title="Print or save deal as PDF" aria-label="Save deal as PDF">Save as PDF</button>
+  </div>
   <div class="stats-row" id="stats-row" role="region" aria-label="Key metrics summary"></div>
 
   <div class="grid">
@@ -968,6 +1098,10 @@
     </details>
 
   </article>
+
+  <div class="print-only print-footer">
+    BRRRR Stress Test &middot; digito.technology &middot; Generated <span class="print-date-footer"></span>
+  </div>
 </main>
 
 <script>
@@ -1614,6 +1748,15 @@ function activateLicense() {
       statusEl.className = 'ls-status err';
     });
 }
+
+// --- Populate print-only date stamps ---
+(function() {
+  var d = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  var headerSpan = document.getElementById('print-date');
+  if (headerSpan) headerSpan.textContent = d;
+  var footerSpans = document.querySelectorAll('.print-date-footer');
+  footerSpans.forEach(function(el) { el.textContent = d; });
+})();
 
 // Initial render
 update();
