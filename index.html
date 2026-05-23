@@ -377,6 +377,67 @@
     visibility: visible;
   }
 
+  /* Site-wide accessible focus ring */
+  :focus { outline: none; }
+  button:focus-visible,
+  a:focus-visible,
+  select:focus-visible,
+  [role="button"]:focus-visible,
+  [tabindex="0"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  input[type="range"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+  input[type="text"]:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  /* Toast notifications (replaces alert/confirm) */
+  .toast-host {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 1000;
+    pointer-events: none;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .toast {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    max-width: 320px;
+    pointer-events: auto;
+    animation: toast-in 0.2s ease-out;
+    line-height: 1.4;
+  }
+  .toast.toast-error { border-left-color: #d97c7c; }
+  .toast.toast-success { border-left-color: var(--accent); }
+  .toast.dismissing { animation: toast-out 0.2s ease-in forwards; }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes toast-out {
+    to { opacity: 0; transform: translateY(8px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .toast, .toast.dismissing { animation: none; }
+  }
+
   /* Page actions row */
   .page-actions {
     display: flex;
@@ -401,14 +462,21 @@
   }
   .sample-deals button {
     font-size: 11px;
-    padding: 5px 10px;
+    padding: 8px 12px;
+    min-height: 32px;
     background: transparent;
     border: 1px solid var(--border);
     color: var(--muted);
     border-radius: 5px;
     cursor: pointer;
     font-family: inherit;
+    touch-action: manipulation;
     transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  @media (max-width: 600px) {
+    .sample-deals button,
+    .action-btn-sm,
+    .action-btn { min-height: 40px; padding: 10px 14px; font-size: 13px; }
   }
   .sample-deals button:hover {
     border-color: var(--accent);
@@ -427,13 +495,15 @@
   }
   .action-btn-sm {
     font-size: 11px;
-    padding: 6px 12px;
+    padding: 8px 12px;
+    min-height: 32px;
     background: transparent;
     border: 1px solid var(--border);
     color: var(--muted);
     border-radius: 5px;
     cursor: pointer;
     font-family: inherit;
+    touch-action: manipulation;
     transition: border-color 0.15s, color 0.15s;
   }
   .action-btn-sm:hover {
@@ -442,13 +512,15 @@
   }
   .action-btn {
     font-size: 12px;
-    padding: 7px 14px;
+    padding: 9px 14px;
+    min-height: 36px;
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--text);
     border-radius: 6px;
     cursor: pointer;
     font-family: inherit;
+    touch-action: manipulation;
     transition: border-color 0.15s, color 0.15s;
   }
   .action-btn:hover {
@@ -656,6 +728,24 @@
     color: var(--red);
     font-weight: 600;
   }
+  /* Color-blind safe glyphs (color is not the only signal) */
+  .stress-grid tbody td.cell-green::before {
+    content: '▲ ';
+    font-weight: 700;
+    opacity: 0.7;
+  }
+  .stress-grid tbody td.cell-gold::before {
+    content: '◆ ';
+    font-weight: 700;
+    opacity: 0.7;
+  }
+  .stress-grid tbody td.cell-red::before {
+    content: '▼ ';
+    font-weight: 700;
+    opacity: 0.7;
+  }
+  /* Skip glyph on the current-base-case cell to avoid double-prefixing the ring indicator */
+  .stress-grid tbody td.is-base::before { content: ''; }
 
   /* Legend */
   .legend {
@@ -791,14 +881,15 @@
   }
   .ls-activate-row input {
     flex: 1;
-    padding: 9px 10px;
+    padding: 10px 12px;
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text);
-    font-size: 12px;
+    font-size: 16px;
     font-family: monospace;
     min-width: 0;
+    min-height: 40px;
   }
   .ls-activate-row input:focus { outline: none; border-color: var(--accent); }
   .ls-activate-row button {
@@ -911,7 +1002,7 @@
       <button class="action-btn" type="button" onclick="window.print()" title="Print or save deal as PDF" aria-label="Save deal as PDF">Save as PDF</button>
     </div>
   </div>
-  <div class="stats-row" id="stats-row" role="region" aria-label="Key metrics summary"></div>
+  <div class="stats-row" id="stats-row" role="region" aria-label="Key metrics summary" aria-live="polite" aria-atomic="false"></div>
 
   <div class="grid">
     <!-- LEFT: Inputs -->
@@ -1123,7 +1214,7 @@
       <a href="https://digito-tech.lemonsqueezy.com/checkout/buy/4f791754-73a5-4a1f-909a-850a28255170" target="_blank" rel="noopener noreferrer" class="ls-buy-btn">Buy now &middot; $10</a>
       <div class="ls-divider">Already have a key?</div>
       <div class="ls-activate-row">
-        <input type="text" id="license-key-input" placeholder="Paste license key" autocomplete="off" spellcheck="false" aria-label="License key" />
+        <input type="text" id="license-key-input" placeholder="Paste license key" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" aria-label="License key" />
         <button type="button" onclick="activateLicense()">Activate</button>
       </div>
       <div id="license-status" class="ls-status" role="status" aria-live="polite"></div>
@@ -1197,6 +1288,8 @@
     BRRRR Stress Test &middot; digito.technology &middot; Generated <span class="print-date-footer"></span>
   </div>
 </main>
+
+<div id="toast-host" class="toast-host" role="region" aria-live="polite" aria-label="Notifications"></div>
 
 <script>
 // --- Formatters ---
@@ -1859,13 +1952,24 @@ var LS_INSTANCE_ID_STORAGE = 'dst_license_instance_id';
 function activateLicense() {
   var input = document.getElementById('license-key-input');
   var statusEl = document.getElementById('license-status');
+  var activateBtn = document.querySelector('.ls-activate-row button');
   var key = (input && input.value ? input.value : '').trim();
   if (!key) {
     statusEl.textContent = 'Paste your license key first.';
     statusEl.className = 'ls-status err';
+    if (input) input.focus();
     return;
   }
-  statusEl.textContent = 'Activating...';
+  var restoreBtn = function() {
+    if (!activateBtn) return;
+    activateBtn.disabled = false;
+    activateBtn.textContent = 'Activate';
+  };
+  if (activateBtn) {
+    activateBtn.disabled = true;
+    activateBtn.textContent = 'Activating';
+  }
+  statusEl.textContent = 'Validating with Lemon Squeezy...';
   statusEl.className = 'ls-status';
   var instanceName = 'BRRRR ' + (navigator.userAgent || '').slice(0, 50) + ' ' + new Date().toISOString().slice(0, 10);
   fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
@@ -1878,12 +1982,14 @@ function activateLicense() {
         var msg = (data && data.error) ? data.error : 'Invalid license key.';
         statusEl.textContent = msg;
         statusEl.className = 'ls-status err';
+        restoreBtn();
         return;
       }
       var productId = data.meta && (data.meta.product_id || data.meta.product_id === 0) ? String(data.meta.product_id) : '';
       if (productId !== LS_PRODUCT_ID) {
         statusEl.textContent = 'This license is for a different product.';
         statusEl.className = 'ls-status err';
+        restoreBtn();
         return;
       }
       try {
@@ -1893,12 +1999,31 @@ function activateLicense() {
       } catch (e) {}
       statusEl.textContent = 'Activated. Ad-free now.';
       statusEl.className = 'ls-status ok';
+      if (activateBtn) activateBtn.textContent = 'Activated';
+      showToast('License activated. Ads removed on this device.', 'success');
       setTimeout(removeAds, 700);
     })
     .catch(function() {
-      statusEl.textContent = 'Network error. Try again.';
+      statusEl.textContent = 'Network error. Try again or check your connection.';
       statusEl.className = 'ls-status err';
+      restoreBtn();
     });
+}
+
+// --- Toast notifications (replaces alert/confirm for non-destructive feedback) ---
+function showToast(text, variant) {
+  var host = document.getElementById('toast-host');
+  if (!host) return;
+  var t = document.createElement('div');
+  t.className = 'toast' + (variant ? ' toast-' + variant : '');
+  t.setAttribute('role', variant === 'error' ? 'alert' : 'status');
+  t.textContent = text;
+  host.appendChild(t);
+  var hold = variant === 'error' ? 4500 : 3000;
+  setTimeout(function() {
+    t.classList.add('dismissing');
+    setTimeout(function() { if (t.parentNode) t.remove(); }, 250);
+  }, hold);
 }
 
 // --- Populate print-only date stamps ---
@@ -1955,12 +2080,14 @@ function saveScenario() {
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   var dateSlug = new Date().toISOString().slice(0, 10);
+  var filename = 'brrrr-scenario-' + dateSlug + '.json';
   a.href = url;
-  a.download = 'brrrr-scenario-' + dateSlug + '.json';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   setTimeout(function() { URL.revokeObjectURL(url); }, 200);
+  showToast('Scenario saved as ' + filename, 'success');
 }
 
 function loadScenarioFile(evt) {
@@ -1973,23 +2100,26 @@ function loadScenarioFile(evt) {
       if (!data || !data.inputs || typeof data.inputs !== 'object') {
         throw new Error('Not a valid BRRRR scenario file.');
       }
+      var restored = 0;
       Object.keys(data.inputs).forEach(function(id) {
         var el = document.getElementById(id);
         if (!el) return;
         el.value = data.inputs[id];
         el.dispatchEvent(new Event('input', { bubbles: true }));
         el.dispatchEvent(new Event('change', { bubbles: true }));
+        restored++;
       });
       update();
       document.querySelectorAll('.sample-deals button').forEach(function(b) { b.classList.remove('active'); });
       var stats = document.getElementById('stats-row');
       if (stats && stats.scrollIntoView) stats.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast('Scenario loaded (' + restored + ' fields restored)', 'success');
     } catch (err) {
-      alert('Could not load scenario: ' + err.message);
+      showToast('Could not load scenario: ' + err.message, 'error');
     }
     evt.target.value = '';
   };
-  reader.onerror = function() { alert('Could not read file.'); };
+  reader.onerror = function() { showToast('Could not read file.', 'error'); };
   reader.readAsText(file);
 }
 
