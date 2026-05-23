@@ -380,9 +380,44 @@
   /* Page actions row */
   .page-actions {
     display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
     margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .sample-deals {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  .sample-deals .sample-label {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: 2px;
+  }
+  .sample-deals button {
+    font-size: 11px;
+    padding: 5px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .sample-deals button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .sample-deals button.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(138, 154, 123, 0.08);
   }
   .action-btn {
     font-size: 12px;
@@ -815,6 +850,12 @@
     <div class="print-sub">Generated <span id="print-date"></span> &middot; digito.technology</div>
   </div>
   <div class="page-actions">
+    <div class="sample-deals" role="group" aria-label="Load a sample deal">
+      <span class="sample-label">Try a sample:</span>
+      <button type="button" data-preset="brrrr4plex" onclick="loadPreset('brrrr4plex', this)">BRRRR 4-plex</button>
+      <button type="button" data-preset="sfrTurnkey" onclick="loadPreset('sfrTurnkey', this)">SFR turnkey</button>
+      <button type="button" data-preset="condoFlip" onclick="loadPreset('condoFlip', this)">Condo flip</button>
+    </div>
     <button class="action-btn" type="button" onclick="window.print()" title="Print or save deal as PDF" aria-label="Save deal as PDF">Save as PDF</button>
   </div>
   <div class="stats-row" id="stats-row" role="region" aria-label="Key metrics summary"></div>
@@ -1757,6 +1798,47 @@ function activateLicense() {
   var footerSpans = document.querySelectorAll('.print-date-footer');
   footerSpans.forEach(function(el) { el.textContent = d; });
 })();
+
+// --- Sample deal presets ---
+var DEAL_PRESETS = {
+  brrrr4plex: {
+    purchasePrice: 130000, downPayment: 25, interestRate: 7, loanTerm: 30,
+    monthlyRent: 2400, vacancyRate: 8, monthlyExpenses: 600, capexReserve: 5,
+    closingBuy: 3, closingSell: 8, holdPeriod: 5, appreciation: 3, partners: 3,
+    rehabBudget: 108000, arv: 280000, refiTiming: 6, refiRate: 7, refiLtv: 75, refiClosing: 2
+  },
+  sfrTurnkey: {
+    purchasePrice: 250000, downPayment: 20, interestRate: 7.5, loanTerm: 30,
+    monthlyRent: 1950, vacancyRate: 5, monthlyExpenses: 400, capexReserve: 5,
+    closingBuy: 3, closingSell: 8, holdPeriod: 7, appreciation: 3, partners: 1,
+    rehabBudget: 0, arv: 250000, refiTiming: 6, refiRate: 7.5, refiLtv: 75, refiClosing: 2
+  },
+  condoFlip: {
+    purchasePrice: 180000, downPayment: 25, interestRate: 8, loanTerm: 30,
+    monthlyRent: 1600, vacancyRate: 10, monthlyExpenses: 350, capexReserve: 3,
+    closingBuy: 4, closingSell: 8, holdPeriod: 1, appreciation: 5, partners: 1,
+    rehabBudget: 35000, arv: 275000, refiTiming: 6, refiRate: 8, refiLtv: 75, refiClosing: 2.5
+  }
+};
+
+function loadPreset(name, btnEl) {
+  var preset = DEAL_PRESETS[name];
+  if (!preset) return;
+  Object.keys(preset).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.value = preset[id];
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  update();
+  // Highlight active preset
+  document.querySelectorAll('.sample-deals button').forEach(function(b) { b.classList.remove('active'); });
+  if (btnEl) btnEl.classList.add('active');
+  // Scroll to results so user sees the effect immediately
+  var stats = document.getElementById('stats-row');
+  if (stats && stats.scrollIntoView) stats.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 // Initial render
 update();
