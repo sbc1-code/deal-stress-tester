@@ -319,6 +319,64 @@
   .stat-card .insight.bad,
   .exit-item .insight.bad { color: var(--red); border-top-color: rgba(168, 84, 84, 0.25); }
 
+  /* Teaching tooltips */
+  .term-help {
+    position: relative;
+    border-bottom: 1px dotted var(--muted);
+    cursor: help;
+    color: inherit;
+    text-decoration: none;
+  }
+  .term-help:focus { outline: none; }
+  .term-help::after {
+    content: attr(data-help);
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--text);
+    width: 260px;
+    max-width: 80vw;
+    text-align: left;
+    line-height: 1.5;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s, visibility 0.15s;
+    pointer-events: none;
+    z-index: 100;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .term-help::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--border);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s, visibility 0.15s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .term-help:hover::after,
+  .term-help:focus::after,
+  .term-help:hover::before,
+  .term-help:focus::before {
+    opacity: 1;
+    visibility: visible;
+  }
+
   /* Stress test grid */
   .stress-section { margin-top: 16px; }
   .stress-section h3 {
@@ -690,7 +748,7 @@
         </div>
 
         <div class="control-group">
-          <label for="capexReserve">Annual CapEx Reserve <span class="val" id="v-capex"></span></label>
+          <label for="capexReserve">Annual <span class="term-help" tabindex="0" data-help="Capital Expenditures. Reserve for big repairs: roof, HVAC, water heater, appliances. Typically 5 to 10% of gross rent.">CapEx</span> Reserve <span class="val" id="v-capex"></span></label>
           <input type="range" id="capexReserve" min="0" max="15" step="1" value="5" aria-label="Annual capital expenditure reserve as percentage of gross rent">
         </div>
 
@@ -698,12 +756,12 @@
         <h2>Transaction Costs</h2>
 
         <div class="control-group">
-          <label for="closingBuy">Closing Costs (Buy) <span class="val" id="v-closebuy"></span></label>
+          <label for="closingBuy"><span class="term-help" tabindex="0" data-help="Fees at purchase: title, appraisal, lender origination, inspection, escrow. Typically 2 to 4% of purchase price.">Closing Costs (Buy)</span> <span class="val" id="v-closebuy"></span></label>
           <input type="range" id="closingBuy" min="0" max="6" step="0.5" value="3" aria-label="Buying closing costs percentage">
         </div>
 
         <div class="control-group">
-          <label for="closingSell">Closing Costs (Sell) <span class="val" id="v-closesell"></span></label>
+          <label for="closingSell"><span class="term-help" tabindex="0" data-help="Fees at sale: agent commissions (typically 5 to 6%), title, transfer tax, recording. All-in typically 7 to 9% of sale price.">Closing Costs (Sell)</span> <span class="val" id="v-closesell"></span></label>
           <input type="range" id="closingSell" min="0" max="12" step="0.5" value="8" aria-label="Selling closing costs percentage, includes agent fees">
         </div>
 
@@ -728,7 +786,7 @@
 
       <!-- BRRRR Cycle Inputs -->
       <div class="panel" style="margin-top:16px;" id="brrrr-inputs-panel">
-        <h2>BRRRR Cycle</h2>
+        <h2><span class="term-help" tabindex="0" data-help="Buy, Rehab, Rent, Refinance, Repeat. Buy distressed below market, force value via rehab, refinance based on new appraised value to recover your capital, repeat with the freed funds.">BRRRR</span> Cycle</h2>
 
         <div class="control-group">
           <label for="rehabBudget">Rehab Budget <span class="val" id="v-rehab"></span></label>
@@ -736,7 +794,7 @@
         </div>
 
         <div class="control-group">
-          <label for="arv">After-Repair Value (ARV) <span class="val" id="v-arv"></span></label>
+          <label for="arv"><span class="term-help" tabindex="0" data-help="After-Repair Value. What the property will appraise for after rehab. Refi lenders base the new loan amount on a percentage of ARV.">After-Repair Value (ARV)</span> <span class="val" id="v-arv"></span></label>
           <input type="range" id="arv" min="50000" max="3000000" step="5000" value="300000" aria-label="After-repair value">
         </div>
 
@@ -754,7 +812,7 @@
         </div>
 
         <div class="control-group">
-          <label for="refiLtv">Refi LTV <span class="val" id="v-refiltv"></span></label>
+          <label for="refiLtv">Refi <span class="term-help" tabindex="0" data-help="Loan-to-Value. The loan amount as a percentage of the property's appraised value. Most refi lenders cap investment-property LTV at 70 to 80%.">LTV</span> <span class="val" id="v-refiltv"></span></label>
           <input type="range" id="refiLtv" min="50" max="85" step="1" value="75" aria-label="Refinance loan-to-value percentage">
         </div>
 
@@ -1301,7 +1359,7 @@ function update() {
       insightHTML(interpretCF(topCF, topMtg)) +
     '</div>' +
     '<div class="stat-card">' +
-      '<div class="label">Cash-on-Cash Return</div>' +
+      '<div class="label"><span class="term-help" tabindex="0" data-help="Cash-on-Cash Return. Annual cash flow divided by cash invested. Most investors target 8 to 12% for long-term holds. After a successful BRRRR refi, it can approach infinity.">Cash-on-Cash</span> Return</div>' +
       '<div class="value ' + cfColor + '">' + cocDisplay + '</div>' +
       '<div class="sub">On ' + fmt(topCocBasis) + (deal.brrrrEnabled ? ' left in deal' : ' invested') + '</div>' +
       insightHTML(interpretCoC(topCoC)) +
@@ -1331,7 +1389,7 @@ function update() {
       '<div class="exit-sub">+ ' + fmt(deal.capexMonthly) + ' capex reserve</div>' +
     '</div>' +
     '<div class="exit-item">' +
-      '<div class="exit-label">Net Operating Income</div>' +
+      '<div class="exit-label"><span class="term-help" tabindex="0" data-help="Net Operating Income. Effective rent (after vacancy) minus operating expenses (taxes, insurance, management, capex reserve). Excludes mortgage payment.">Net Operating Income</span></div>' +
       '<div class="exit-value">' + fmt(deal.monthlyNOI) + '/mo</div>' +
     '</div>' +
     '<div class="exit-item">' +
