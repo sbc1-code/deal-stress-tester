@@ -6,7 +6,9 @@ See where a deal breaks before you buy.
 
 ## Why This Exists
 
-A real 4-plex: bought at $130K, rehabbed $108K, refi'd at $280K, sold at $400K, netted ~$15K over 4.5 years. The effective hourly rate for managing it came in under $6/hr. No existing calculator would have shown that reality before closing. Most calculators show you the best case. This one leads with where it breaks.
+A real 4-plex I co-owned, run through the full BRRRR cycle from 2021 to 2026: bought, renovated, refinanced, rented, sold. The property roughly tripled in value and the partners still came out roughly break-even. The cash-out refinance closed with a debt service coverage ratio below 1.0, the loan was interest-only, and the renovation ran far over its own contract. Every one of those was computable before signing, and no calculator I could find would have shown it. Most calculators show you the best case. This one leads with where it breaks.
+
+Full write-up: [the case study](https://sbc1-code.github.io/portfolio/roca-case-study.html).
 
 ## What It Does
 
